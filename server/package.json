@@ -1,0 +1,20 @@
+{
+  "name": "peerrx-node-react-docker-compose",
+  "version": "1.0.0",
+  "description": "Fining peers fast",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Peter Coles",
+  "license": "MIT",
+  "dependencies": {
+    "deep-extend": "^0.6.0",
+    "express": "^4.16.4",
+    "randomatic": "^3.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.7"
+  }
+}
