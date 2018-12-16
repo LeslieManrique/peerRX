@@ -1,15 +1,28 @@
-version: '2'
+version: '3'
 services:
+  db:
+    build:
+      context: ./db
+    env_file: .env
+    volumes:
+            - ./db/mysql/:/var/lib/mysql
+    ports:
+      - "4306:3306"
   server:
     build:
       context: ./server/
+    depends_on:
+      - db
     command: /usr/app/node_modules/.bin/nodemon src/server.js
     volumes:
       - ./server/:/usr/app
       - /usr/app/node_modules
+    links:
+      - db:db
     ports:
       - "8080:8080"
     # env_file: ./server/.env # TODO - uncomment this to auto-load your .env file!
+    env_file: .env
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true

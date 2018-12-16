@@ -7,14 +7,15 @@
     "start": "node src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Peter Coles",
-  "license": "MIT",
+  "author": "Leslie Manrique",
+  "license": "",
   "dependencies": {
     "deep-extend": "^0.6.0",
     "express": "^4.16.4",
+    "mysql": "^2.16.0",
     "randomatic": "^3.1.1"
   },
   "devDependencies": {
-    "nodemon": "^1.18.7"
+    "nodemon": "^1.18.8"
   }
 }
