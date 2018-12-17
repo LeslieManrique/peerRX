@@ -1,9 +1,10 @@
 const express = require('express');
 const path = require('path');
+const logger = require('morgan');
 const bodyParser = require('body-parser');
+const http = require('http');
 //app imports
 const { userRouter } = require('./routers'); //require our routes/
-
 // Constants
 const PORT = process.env.PORT || 8080;
 const HOST = '0.0.0.0';
@@ -15,10 +16,11 @@ const app = express();
 
 // Static files
 // app.use(express.static(CLIENT_BUILD_PATH));
+app.use(logger('dev'));
 
 //Parse incoming requests 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 
 // API
