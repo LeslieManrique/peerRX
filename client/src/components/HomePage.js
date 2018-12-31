@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import { Route, withRouter, Link } from 'react-router-dom';
-import Registration from './Registration';
-import LogIn from './LogIn';
+import { withRouter, Link } from 'react-router-dom';
 
 class HomePage extends Component{
 

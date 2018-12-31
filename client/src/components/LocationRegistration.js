@@ -2,14 +2,14 @@ import React, { Component } from 'react';
 import AddAgency from "./AddAgency";
 
 export default class LocationRegistration extends Component{
+	// expected peer agency info {name:'', city:'', state:'', zipcode:'', phone_number:'', main_contact_name:'', main_contact_email:''}
 	state = {
 		peer_agencies: []
 	};
 
-	handleAddAgency = (e) => {
+	handleAdd = (new_agency, e) => {
 		e.preventDefault();
-
-		return (<AddAgency />);
+		this.setState({ peer_agencies: this.state.peer_agencies.concat([new_agency])});
 	};
 
 	render(){
@@ -25,9 +25,23 @@ export default class LocationRegistration extends Component{
 					Telephone: <input type="text" name="phone_number" required/><br/>
 
 					<div>
-						<p>Local Agencies:</p>
-						<AddAgency />
-						<button onClick={this.handleAddAgency}>Add New Agency</button>
+						<h2>Local Agencies:</h2>
+						<div>
+							{this.state.peer_agencies.map((agency, index) => (
+								<div className="agency_info" key={index}>
+									<h3>Agency #{index + 1}: {agency.name}</h3>
+									<div className="address">
+										<p className="city">{agency.city}</p>
+										<p className="state">{agency.state}</p>
+										<p className="zipcode">{agency.zipcode}</p>
+									</div>
+									<p className="phone_number">{agency.phone_number}</p>
+									<p className="main_contact_name">{agency.main_contact_name ? "Main Contact: " + agency.main_contact_name: agency.main_contact_name}</p>
+									<p className="main_contact_email">{agency.main_contact_email ? "Contact Email: " + agency.main_contact_email: agency.main_contact_email}</p>
+								</div>
+							))}
+							<AddAgency handleAdd={this.handleAdd}/>
+						</div>
 					</div>
 
 					<div>
