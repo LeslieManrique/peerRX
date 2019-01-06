@@ -5,7 +5,7 @@ import LocationRegistration from "./LocationRegistration";
 
 export default class Registration extends Component{
 	state = {
-		user_type: "",
+		user_type: ""
 	};
 
 	selectUserType = (e) => {

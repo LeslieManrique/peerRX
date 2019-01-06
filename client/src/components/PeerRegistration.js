@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { validateField, isEmail, isEmpty, isSame } from './validationFunctions'
+import { validateField, isEmail, isEmpty, isSame } from '../validationFunctions'
 
 export default class PeerRegistration extends Component{
 	state = {
