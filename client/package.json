@@ -7,7 +7,7 @@
     "npm-run-all": "^4.1.2",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
-    "react-scripts": "1.1.4"
+    "react-scripts": "^2.1.2"
   },
   "scripts": {
     "start": "npm-run-all -p watch-css start-js",
@@ -19,5 +19,11 @@
     "start-js": "react-scripts start",
     "build-js": "react-scripts build"
   },
-  "proxy": "http://server:8080"
+  "proxy": "http://server:8080",
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
