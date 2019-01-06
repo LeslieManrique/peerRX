@@ -1,0 +1,54 @@
+body {
+  margin-left: 10%;
+  margin-right: 10%; }
+
+h1 {
+  text-align: center;
+  font-size: 3em; }
+
+h2 {
+  text-align: center;
+  font-size: 2em; }
+
+/* style welcome page */
+#welcome-page {
+  /*border: 3px solid black;*/ }
+
+#welcome-video {
+  position: relative;
+  padding-bottom: 56.25%;
+  /* 16:9 */
+  padding-top: 25px;
+  height: 0;
+  /*border: 3px solid black;*/ }
+
+#welcome-video iframe {
+  position: absolute;
+  top: 0%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  /*border: 3px solid black;*/ }
+
+#interest-link {
+  text-align: center;
+  font-size: 2em; }
+
+/* style thank you page */
+#thank-you {
+  position: relative;
+  margin: auto;
+  width: 50%;
+  height: 200px;
+  padding: 10px;
+  border: 3px solid black; }
+
+#thank-you p {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center; }
+
+/* style interest form */
