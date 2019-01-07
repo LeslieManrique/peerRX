@@ -2,16 +2,18 @@ const interest = require('../models').interest;
 const { body, getValidationResult }  = require('express-validator/check');
 
 const submitInterestErrorFormatter = result => {
-    console.log("result\t",result)
-    let errorObject = {}
-    result.array().map(i => {
-        if (!errorObject.hasOwnProperty(i.param)) {
-            errorObject[i.param] = i.msg;
-        }
-    });
-    
-    console.log('Error Object', errorObject);
-    throw (errorObject);
+    if (!result.isEmpty()){
+        console.log("result\t",result)
+        let errorObject = {}
+        result.array().map(i => {
+            if (!errorObject.hasOwnProperty(i.param)) {
+                errorObject[i.param] = i.msg;
+            }
+        });
+        
+        console.log('Error Object', errorObject);
+        throw (errorObject);
+    }
 
 }
 
@@ -32,6 +34,7 @@ module.exports = {
     },
  
     create: (req, res, next) => {
+
         req
         .getValidationResult() //get the result of validate function
         .then((result) => submitInterestErrorFormatter(result))
@@ -50,7 +53,8 @@ module.exports = {
               .catch(error => res.status(400).send(error));
         })
         .catch((error) => {
-            res.json(error);
+            console.log("catiching error ", error)
+            res.status(500).json(error);
         })
      
     },

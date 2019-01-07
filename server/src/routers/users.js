@@ -7,6 +7,7 @@ let id = 1;
 
 
 router
+  .get('/users',usersController.list)
   .post('/users', usersController.create);
 
 //testing router 
