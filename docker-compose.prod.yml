@@ -1,11 +1,25 @@
-version: '2'
+version: '3'
 services:
-  web:
-    build: .
+  server:
+    build:
+      context: ./server/
+    volumes:
+      - ./server/:/usr/app
+      - /usr/app/node_modules
     ports:
-      - "80:8000"
-    restart: always
-    # env_file: ./server/.env # TODO - uncomment this to auto-load your .env file!
+      - "8080:8080"
+    env_file: .env
     environment:
-      NODE_ENV: production
-      PORT: 8000
+      - NODE_ENV=production
+      - CHOKIDAR_USEPOLLING=true
+  client:
+    build:
+      context: ./client/
+    command: npm start
+    volumes:
+      - ./client/:/usr/app
+      - /usr/app/node_modules
+    depends_on:
+      - server
+    ports:
+      - "3000:3000"

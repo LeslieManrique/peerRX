@@ -1,9 +1,11 @@
 const express = require('express');
 const path = require('path');
+const logger = require('morgan');
 const bodyParser = require('body-parser');
+const expressValidator = require('express-validator')
+const http = require('http');
 //app imports
-const { userRouter } = require('./routers'); //require our routes/
-
+const { userRouter, interestRouter } = require('./routers'); //require our routes/
 // Constants
 const PORT = process.env.PORT || 8080;
 const HOST = '0.0.0.0';
@@ -15,15 +17,16 @@ const app = express();
 
 // Static files
 // app.use(express.static(CLIENT_BUILD_PATH));
+app.use(logger('dev'));
 
 //Parse incoming requests 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended:false}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
-
+app.use(expressValidator())
 // API
 app.get('/',(req,res)=>{
-  return res.redirect('/users')
+  return res.redirect('/interest')
 })
 
 app.get('/api', (req, res) => {
@@ -41,6 +44,7 @@ app.get('/api/torb', (req, res) => {
   res.send(JSON.stringify(data, null, 2));
 });
 app.use(userRouter);
+app.use(interestRouter);
 // All remaining requests return the React app, so it can handle routing.
 app.get('*', function(request, response) {
   response.send('Welcome to the beginning of nothingness!')
