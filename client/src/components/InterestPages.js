@@ -7,6 +7,11 @@ const ThankYouPage = (props) => (
 	</div>
 );
 
+const linkStlye = {
+	textDecoration: "none"
+};
+
+
 const WelcomePage = (props) => (
 	<div id="welcome-page">
 		<h1>Learn More About PeerRX</h1>
@@ -15,7 +20,7 @@ const WelcomePage = (props) => (
 				Learn about PeerRX! If video does not play, click <a href="https://youtu.be/NeB3EuX_v0Y">here</a> to watch!
 			</iframe>
 		</div>
-		<div id="interest-link"><Link to="/interest_form">Interested?</Link></div>
+		<div id="interest-link"><Link style={linkStlye} to="/interest_form">Interested?</Link></div>
 	</div>
 );
 
