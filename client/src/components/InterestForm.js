@@ -82,29 +82,38 @@ class InterestForm extends Component{
 			<div>
 				<h1>PeerRX Interest Form</h1>
 				<h2>Sign up to get access to PeerRX upon release!</h2>
+				<p className="instructions">* are required fields</p>
 
 				<form id="interest_form" onSubmit={this.handleSubmit}>
-					<p className="instructions">* are required fields</p>
+					<div className="form-part">
+						I am a* ...
+						<select name="user_type" value={this.state.form_inputs.user_type} onChange={this.handleChange}>
+							<option value="" disabled>Select User Type</option>
+							<option value="0">Peer</option>
+							<option value="1">Peer Agency</option>
+							<option value="2">Location</option>
+						</select>
+						{this.state.errors.user_type ? <p className="error-message">{this.state.errors.user_type}</p> : undefined}
+					</div>
 
-					I am a ...
-					<select name="user_type" value={this.state.form_inputs.user_type} onChange={this.handleChange}>
-						<option value="" disabled>Select User Type</option>
-						<option value="0">Peer</option>
-						<option value="1">Peer Agency</option>
-						<option value="2">Location</option>
-					</select>
-					{this.state.errors.user_type ? <p className="error-message">{this.state.errors.user_type}</p> : undefined}
+					<div className="form-part">
+						Name* <input type="text" name="name" onChange={this.handleChange} />
+						{this.state.errors.name ? <p className="error-message">{this.state.errors.name}</p> : undefined}
+					</div>
 
-					Name* <input type="text" name="name" onChange={this.handleChange} />
-					{this.state.errors.name ? <p className="error-message">{this.state.errors.name}</p> : undefined}
-					
-					Email* <input type="text" name="email" onChange={this.handleChange} />
-					{this.state.errors.email ? <p className="error-message">{this.state.errors.email}</p> : undefined}
+					<div className="form-part">
+						Email* <input type="text" name="email" onChange={this.handleChange} />
+						{this.state.errors.email ? <p className="error-message">{this.state.errors.email}</p> : undefined}
+					</div>
 
-					Phone Number <input type="text" name="phone_number" onChange={this.handleChange}/>
-					{this.state.errors.phone_number ? <p className="error-message">{this.state.errors.phone_number}</p> : undefined}
+					<div className="form-part">
+						Phone Number <input type="text" name="phone_number" onChange={this.handleChange}/>
+						{this.state.errors.phone_number ? <p className="error-message">{this.state.errors.phone_number}</p> : undefined}
+					</div>
 
-					<button>Submit</button>
+					<div className="form-part">
+						<button>Submit</button>
+					</div>
 				</form>
 			</div>
 		);
