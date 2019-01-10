@@ -16,7 +16,6 @@ h2{
 /* style welcome page */
 #welcome-page{
 	text-align: center;
-	/*border: 3px solid black;*/
 }
 
 #welcome-video{
@@ -24,7 +23,6 @@ h2{
 	padding-bottom: 50%;
 	padding-top: 25px;
 	height: 0;
-	/*border: 3px solid purple;*/
 }
 
 #welcome-video iframe{
@@ -33,7 +31,6 @@ h2{
 	left: 0;
 	width: 100%;
 	height: 100%;
-	/*border: 3px solid green;*/
 }
 
 #interest-link{
@@ -43,20 +40,29 @@ h2{
 }
 
 /* style thank you page */
-#thank-you{
-	display: block;
- 	margin-left: auto;
-  	margin-right: auto;
-}
-
-#thank-you p{
-	text-align: center;
-	margin: 0;
-	font-size: 3em;
-	position: absolute;
+.thank-you{
+  	position: absolute;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
+
+  	display: flex;
+	flex-direction: column;
+  	justify-content: left;
+  	align-items: center;
+}
+
+p#subtext{
+	font-size: 1.5em;
+	color: black;
+}
+
+.thank-you p{
+	text-align: center;
+	display: block;
+	margin: 5px;
+	padding: 5px;
+	font-size: 3em;
 	color: black;
 }
 

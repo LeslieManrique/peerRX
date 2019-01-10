@@ -2,8 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const ThankYouPage = (props) => (
-	<div id="thank-you">
+	<div className="thank-you">
 		<p>Thank you for your interest!</p>
+		<p id="subtext">We will email you when Connect2APeer/PeerRx is live. Feel free to contact <a href="mailto:info@connect2Apeer.com">info@connect2Apeer.com</a> for more information.</p>
 	</div>
 );
 
