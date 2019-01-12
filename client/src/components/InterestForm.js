@@ -99,7 +99,7 @@ class InterestForm extends Component{
 					</div>
 
 					<div className="form-part">
-						Name* <input type="text" name="name" onChange={this.handleChange} />
+						Contact Name* <input type="text" name="name" onChange={this.handleChange} />
 						{this.state.errors.name ? <p className="error-message">{this.state.errors.name}</p> : undefined}
 					</div>
 
