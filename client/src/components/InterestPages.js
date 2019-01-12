@@ -15,7 +15,7 @@ const linkStlye = {
 
 const WelcomePage = (props) => (
 	<div id="welcome-page">
-		<h1>Learn More About PeerRX</h1>
+		<h1>Connect2APeer</h1>
 		<div id="welcome-video">
 			<iframe title="peerrx-video" width="420" height="315" src="https://www.youtube.com/embed/NeB3EuX_v0Y">
 				Learn about PeerRX! If video does not play, click <a href="https://youtu.be/NeB3EuX_v0Y">here</a> to watch!
