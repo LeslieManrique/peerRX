@@ -5,7 +5,7 @@ body{
 
 h1{
 	text-align: center;
-	font-size: 3em;
+	font-size: 2em;
 }
 
 h2{
@@ -15,48 +15,82 @@ h2{
 
 /* style welcome page */
 #welcome-page{
-	/*border: 3px solid black;*/
+	text-align: center;
 }
 
 #welcome-video{
 	position: relative;
-	padding-bottom: 56.25%; /* 16:9 */
+	padding-bottom: 50%;
 	padding-top: 25px;
 	height: 0;
-	/*border: 3px solid black;*/
 }
 
 #welcome-video iframe{
 	position: absolute;
-	top: 0%;
-	left: 10%;
-	width: 80%;
-	height: 80%;
-	/*border: 3px solid black;*/
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
 }
 
 #interest-link{
-	text-align: center;
-	font-size: 2em;
+	font-size: 1.5em;
+	padding-top: 1em;
+	padding-bottom: 1em;
 }
 
 /* style thank you page */
-#thank-you{
- 	position: relative;
-	margin: auto;
-	width: 50%;
-	height: 200px;
-	padding: 10px;
-  	border: 3px solid black;
-}
-
-#thank-you p{
-	margin: 0;
-	position: absolute;
+.thank-you{
+  	position: absolute;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
+
+  	display: flex;
+	flex-direction: column;
+  	justify-content: left;
+  	align-items: center;
+}
+
+p#subtext{
+	font-size: 1.5em;
+	color: black;
+}
+
+.thank-you p{
 	text-align: center;
+	display: block;
+	margin: 5px;
+	padding: 5px;
+	font-size: 3em;
+	color: black;
 }
 
 /* style interest form */
+form{
+	display: flex;
+  	flex-direction: column;
+  	justify-content: left;
+  	align-items: center;
+}
+
+.form-part{
+	text-align: left;
+	display: block;
+	margin: 5px;
+	padding: 5px;
+}
+
+p, .error-message{
+	text-align: center;
+	color: red;
+}
+
+
+
+
+
+
+
+
+
