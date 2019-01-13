@@ -10,14 +10,16 @@ class InterestForm extends Component{
 			user_type: "",
 			name: "",
 			email: "",
-			phone_number: ""
+			phone_number: "",
+			organization: ""
 		},
 		errors: {},
 		validations: {
 			user_type: [isUserType],
 			name: [isEmpty],
 			email: [isEmpty, isEmail],
-			phone_number: [isPhoneNumber]
+			phone_number: [isPhoneNumber],
+			organization: []
 		}
 	};
 
@@ -80,7 +82,7 @@ class InterestForm extends Component{
 	render(){
 		return(
 			<div>
-				<h1>PeerRX Interest Form</h1>
+				<h1>Connect2APeer</h1>
 				<h2>Sign up to get access to PeerRX upon release!</h2>
 				<p className="instructions">* are required fields</p>
 
@@ -97,8 +99,13 @@ class InterestForm extends Component{
 					</div>
 
 					<div className="form-part">
-						Name* <input type="text" name="name" onChange={this.handleChange} />
+						Contact Name* <input type="text" name="name" onChange={this.handleChange} />
 						{this.state.errors.name ? <p className="error-message">{this.state.errors.name}</p> : undefined}
+					</div>
+
+					<div className="form-part">
+						Organization <input type="text" name="organization" onChange={this.handleChange} />
+						{this.state.errors.organization ? <p className="error-message">{this.state.errors.organization}</p> : undefined}
 					</div>
 
 					<div className="form-part">
