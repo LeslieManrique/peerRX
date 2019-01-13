@@ -17,6 +17,9 @@ module.exports = {
       phone_number: {
         type: Sequelize.STRING
       },
+      organization: {
+        type: Sequelize.STRING
+      },
       user_type: {
         type: Sequelize.TINYINT
       },
