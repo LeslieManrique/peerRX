@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     email: DataTypes.STRING,
     phone_number: DataTypes.STRING,
+    organization: DataTypes.STRING,
     user_type: DataTypes.TINYINT
   }, {});
   interest.associate = function(models) {
