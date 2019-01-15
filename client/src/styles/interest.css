@@ -70,8 +70,11 @@ p#subtext{
 form{
 	display: flex;
   	flex-direction: column;
-  	justify-content: left;
-  	align-items: center;
+  	justify-content: flex-start;
+  	align-items: flex-start;
+  	/*border: 3px solid black;*/
+  	width: 28%;
+  	margin: auto;
 }
 
 .form-part{
@@ -79,6 +82,7 @@ form{
 	display: block;
 	margin: 5px;
 	padding: 5px;
+	margin-left: 10px;
 }
 
 p, .error-message{
@@ -86,8 +90,17 @@ p, .error-message{
 	color: red;
 }
 
+@media only screen and (max-width: 400px) {
+  form {
+    width: 40%;
+  }
+}
 
-
+@media only screen and (max-width: 800px) {
+  form {
+    width: 25%;
+  }
+}
 
 
 
