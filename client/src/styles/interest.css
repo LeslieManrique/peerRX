@@ -73,7 +73,7 @@ form{
   	justify-content: flex-start;
   	align-items: flex-start;
   	/*border: 3px solid black;*/
-  	width: 28%;
+  	width: 26%;
   	margin: auto;
 }
 
@@ -82,7 +82,6 @@ form{
 	display: block;
 	margin: 5px;
 	padding: 5px;
-	margin-left: 10px;
 }
 
 p, .error-message{
@@ -90,17 +89,25 @@ p, .error-message{
 	color: red;
 }
 
-@media only screen and (max-width: 400px) {
+@media only screen and (max-width: 1300px) {
   form {
-    width: 40%;
+    width: 30%;
   }
 }
 
 @media only screen and (max-width: 800px) {
   form {
-    width: 25%;
+    width: 40%;
   }
 }
+
+@media only screen and (max-width: 400px) {
+  form {
+    width: 50%;
+  }
+}
+
+
 
 
 
