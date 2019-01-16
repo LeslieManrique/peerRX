@@ -72,15 +72,43 @@ form{
   	flex-direction: column;
   	justify-content: flex-start;
   	align-items: flex-start;
-  	/*border: 3px solid black;*/
-  	width: 26%;
+  	width: 15%;
   	margin: auto;
 }
 
-.form-part{
+form > .form-part{
+	margin-top: 10px;
+	width: 100%;
+}
+
+form > .form-part > p, input, select{
 	text-align: left;
 	display: block;
 	margin: 5px;
+	padding: 5px;
+}
+
+form > .form-part > input, select{
+	width: 100%;
+	margin: 0px;
+}
+
+form > .form-part > input{
+	border: 0px;
+	margin: 0px;
+	width: 100%;
+	border: 1px solid gray; 
+}
+
+form > .form-part > label{
+	margin-top: 5px;
+	font-size: 1.05em;
+}
+
+form > .form-part > button{
+	border-radius: 5px;
+	font-size: 1em;
+	width: min-content;
 	padding: 5px;
 }
 
@@ -89,15 +117,44 @@ p, .error-message{
 	color: red;
 }
 
-@media only screen and (max-width: 1300px) {
+.error-message{
+	font-size: 0.75em;
+}
+
+/* sizing adjustments for resizing screen */
+@media only screen and (max-width: 1150px) {
   form {
-    width: 30%;
+    width: 20%;
+  }
+}
+
+@media only screen and (max-width: 900px) {
+  form {
+    width: 22%;
   }
 }
 
 @media only screen and (max-width: 800px) {
   form {
+    width: 25%;
+  }
+}
+
+@media only screen and (max-width: 700px) {
+  form {
+    width: 35%;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  form {
     width: 40%;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  form {
+    width: 45%;
   }
 }
 
@@ -107,6 +164,11 @@ p, .error-message{
   }
 }
 
+@media only screen and (max-width: 350px) {
+  form {
+    width: 60%;
+  }
+}
 
 
 
