@@ -87,35 +87,40 @@ class InterestForm extends Component{
 				<p className="instructions">* are required fields</p>
 
 				<form id="interest_form" onSubmit={this.handleSubmit}>
+					
 					<div className="form-part">
-						I am a* ...
+						<label>I am a* ...</label>
+						{this.state.errors.user_type ? <p className="error-message">{this.state.errors.user_type}</p> : undefined}
 						<select name="user_type" value={this.state.form_inputs.user_type} onChange={this.handleChange}>
 							<option value="" disabled>Select User Type</option>
 							<option value="0">Peer</option>
 							<option value="1">Peer Agency</option>
 							<option value="2">Location</option>
 						</select>
-						{this.state.errors.user_type ? <p className="error-message">{this.state.errors.user_type}</p> : undefined}
 					</div>
 
 					<div className="form-part">
-						Contact Name* <input type="text" name="name" onChange={this.handleChange} />
+						<label>Contact Name*</label>
 						{this.state.errors.name ? <p className="error-message">{this.state.errors.name}</p> : undefined}
+						<input type="text" name="name" onChange={this.handleChange} />
 					</div>
 
 					<div className="form-part">
-						Organization <input type="text" name="organization" onChange={this.handleChange} />
+						<label>Organization</label>
 						{this.state.errors.organization ? <p className="error-message">{this.state.errors.organization}</p> : undefined}
+						<input type="text" name="organization" onChange={this.handleChange} />
 					</div>
 
 					<div className="form-part">
-						Email* <input type="text" name="email" onChange={this.handleChange} />
+						<label>Email*</label>
 						{this.state.errors.email ? <p className="error-message">{this.state.errors.email}</p> : undefined}
+						<input type="text" name="email" onChange={this.handleChange} />
 					</div>
 
 					<div className="form-part">
-						Phone Number <input type="text" name="phone_number" onChange={this.handleChange}/>
+						<label>Phone Number</label>
 						{this.state.errors.phone_number ? <p className="error-message">{this.state.errors.phone_number}</p> : undefined}
+						<input type="text" name="phone_number" onChange={this.handleChange}/>
 					</div>
 
 					<div className="form-part">
