@@ -21,12 +21,15 @@ module.exports = {
         const content = fillTemplate(fs_read, {name, email, user_type, phone_number, organization});
 
         const tranporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
             service: 'gmail',
             auth: {
+                type: 'oauth2',
                 user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASSWORD,
+                clientId: process.env.GOOGLE_CLIENT_ID,
+                clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+                refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
             }
+           
         });
 
         const mailOptions = {
@@ -36,16 +39,16 @@ module.exports = {
             html: content, 
             replyTo: process.env.EMAIL_USER_RECEIVER
         };
+       
 
         tranporter.sendMail(mailOptions, function(err, res){
             console.log("sending");
             if(err){
-                console.log("There was an error: ", err);
-                error = {error: "There was an error in sending your email. Please Try again"};
-                throw(error);
+                console.log("There was an error in sending your email. Please Try again", err);
             }
             else{
-                console.log('Email sent!');
+                console.log('Email sent!'
+                );
             }
         });
     }
