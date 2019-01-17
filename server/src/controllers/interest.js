@@ -58,12 +58,11 @@ module.exports = {
             res.status(500).json(error);
         })
         .then(()=> {
-            console.log("submitting email")
-            sendInterestRequest(req.body)
+            console.log("submitting email");
+            sendInterestRequest(req.body);
         })
         .catch((error)=>{
-            console.log("Could not submit email", error)
-
+            console.log("Could not submit email", error);
         })
      
     },
