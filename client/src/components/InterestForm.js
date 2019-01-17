@@ -83,7 +83,7 @@ class InterestForm extends Component{
 		return(
 			<div>
 				<h1>Connect2APeer</h1>
-				<h2>Sign up to get access to PeerRX upon release!</h2>
+				<h2>Sign up to get access upon release!</h2>
 				<p className="instructions">* are required fields</p>
 
 				<form id="interest_form" onSubmit={this.handleSubmit}>
