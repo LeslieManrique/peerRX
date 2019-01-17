@@ -1,11 +1,11 @@
-#Production 
+## Production 
 docker-compose -f docker-compose.prod.yml up
 
-#Development
+## Development
 docker-compose up
 
-#.env
-Fill out the credentials 
+## .env
+Fill out the credentials and place file in the project root directory
 ```
 MYSQL_HOST=
 MYSQL_DATABASE=
