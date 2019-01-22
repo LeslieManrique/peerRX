@@ -22,41 +22,35 @@ module.exports = {
 
         const fs_read = fs.readFileSync('src/static/interest_email.html', 'utf8');
         const content = fillTemplate(fs_read, {name, email, user_type, phone_number, organization});
-        
-        const oauth2Client = new OAuth2(
-            process.env.GOOGLE_CLIENT_ID,
-            process.env.GOOGLE_CLIENT_SECRET,
-            "https://developers.google.com/oauthplayground" // Redirect URL
-            );
-        
-        // get a new access token
-        oauth2Client.setCredentials({
-            refresh_token: process.env.GOOGLE_REFRESH_TOKEN
-        });
-        
-        const tokens = await oauth2Client.refreshAccessToken()
-        const accessToken = tokens.credentials.access_token
 
-        // const accessToken = ''
         const transporter = nodemailer.createTransport({
             service: 'gmail',
+            port: 465, 
+            secure: true,
             auth: {
-                type: 'oauth2',
+                type: 'OAuth2',
                 user: process.env.EMAIL_USER,
                 clientId: process.env.GOOGLE_CLIENT_ID,
                 clientSecret: process.env.GOOGLE_CLIENT_SECRET,
                 refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-                access_token: accessToken
+                access_token: process.env.GOOGLE_ACCESS_TOKEN,
+                expires: Number.parseInt(process.env.GOOGLE_EXPIRES,10)
             }
            
         });
 
+        let maillist = [
+            'info@connect2apeer.com',
+            'leslie@peer-rx.com'
+        ];
+          
+        maillist = maillist.toString();
         const mailOptions = {
             from: process.env.EMAIL_USER,
-            to: process.env.EMAIL_USER_RECEIVER,
+            to: maillist,
             subject: 'PeerRX Interest Request',
             html: content, 
-            replyTo: process.env.EMAIL_USER_RECEIVER
+            replyTo: 'info@connect2apeer.com'
         };
 
         transporter.sendMail(mailOptions, (error, response) => {
