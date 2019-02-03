@@ -1,38 +1,46 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const users = sequelize.define('users', {
-    id: {
+  const Agency = sequelize.define('Agency', {
+    userId: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true,
       allowNull: false
     },
-    first_name: {
+    address1: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    last_name: {
-      type: DataTypes.STRING
+    address2: {
+      type: DataTypes.STRING,
+      allowNull: true
     },
-    email_address: {
+    city: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    user_type: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    phone_number: {
+    state: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    password: {
+    zipcode: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    coordinate_point: {
       type: DataTypes.STRING,
       allowNull: false
     }
   }, {});
-  users.associate = function(models) {
+  
+  Agency.associate = function(models) {
     // associations can be defined here
+
+    // an Agency is a type of User
+    Agency.belongsTo(models.users, {
+    	primaryKey: 'userId',
+    	onDelete: 'CASCADE'
+    });
   };
-  return users;
+  
+  return Agency;
 };

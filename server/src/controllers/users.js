@@ -8,7 +8,7 @@ module.exports = {
         .create({
           first_name: req.body.first_name,
           last_name: req.body.last_name,
-          email_address: req.body.email,
+          email_address: req.body.email_address,
           user_type: req.body.user_type,
           phone_number: req.body.phone_number,
           password: req.body.password,

@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const expressValidator = require('express-validator')
 const http = require('http');
 //app imports
-const { userRouter, interestRouter } = require('./routers'); //require our routes/
+const { userRouter, interestRouter, agencyRouter, peerRouter, locationRouter } = require('./routers'); //require our routes/
 // Constants
 const PORT = process.env.PORT || 8080;
 const HOST = '0.0.0.0';
@@ -45,6 +45,11 @@ app.get('/api/torb', (req, res) => {
 });
 app.use(userRouter);
 app.use(interestRouter);
+
+app.use(agencyRouter);
+app.use(peerRouter);
+app.use(locationRouter);
+
 // All remaining requests return the React app, so it can handle routing.
 app.get('*', function(request, response) {
   response.send('Welcome to the beginning of nothingness!')
