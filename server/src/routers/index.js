@@ -3,4 +3,7 @@ module.exports = {
     agencyRouter: require('./agency'),
     peerRouter: require('./peer'),
     locationRouter: require('./location'),
+    agenciesLocationsRouter: require('./agencieslocations'),
+    agenciesPeersRouter: require('./agenciespeers'),
+    
 }

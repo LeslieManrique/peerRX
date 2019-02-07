@@ -1,5 +1,6 @@
 const users = require('../models').users;
-const { check } = require('express-validator/check')
+const { check } = require('express-validator/check');
+
 module.exports = {
     create(req, res) {
       console.log('posting')
@@ -12,8 +13,6 @@ module.exports = {
           user_type: req.body.user_type,
           phone_number: req.body.phone_number,
           password: req.body.password,
-          user_type: req.body.user_type
-
         })
         .then(users => res.status(201).send(users))
         .catch(error => res.status(400).send(error));
