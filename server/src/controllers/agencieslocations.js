@@ -1,22 +1,5 @@
 const sequelize = require('../models').sequelize;
-
-// find user by user ID then get their user type
-// search for user id from req.params.userId in users table and get user type number
-function findUserType(currentUserId){
-    const selectByUserIdQuery = 'SELECT * FROM `users` WHERE id=:userId'
-    return sequelize
-        .query(selectByUserIdQuery, {
-            replacements: {userId: currentUserId},
-            type: sequelize.QueryTypes.SELECT
-        })
-        .then(users => {
-            if(!users){
-                return new Error("User Not Found.");
-            }
-            return users[0].user_type;
-        })
-        .catch(error => console.log(error));
-}
+const { findUserType, getGivenUserInfoAll } = require('../helpers/queryFunctions');
 
 // get what type of user currently signed in as to determine which values are going to be locationId and agencyId
 function getConditions(currentUserId, req){
@@ -50,72 +33,112 @@ function getConditions(currentUserId, req){
         });
 }
 
+// check if association already exists (given agency id and location id)
+function checkExisting(identifications){
+    const selectAssociationQuery = "SELECT * FROM `AgenciesLocations` WHERE agencyId=:agencyId AND locationId=:locationId";
+    return sequelize
+        .query(selectAssociationQuery, {
+            replacements: identifications,
+            type: sequelize.QueryTypes.SELECT
+        })
+        .then(associations => {
+            if(associations.length !== 0){
+                return new Error('Agency-Location association already exists!');
+            }
+
+            //return the agencyId and locationId if association not found
+            return identifications;
+        })
+        .catch(error => console.log(error));
+}
+
+// insert association into AgenciesLocations table
+function insertAssociation(association){
+    // raw query to insert new association
+    const insertAgencyLocationQuery = "INSERT INTO `AgenciesLocations` (locationId, agencyId) VALUES (:locationId, :agencyId)";
+    return sequelize
+        .query(insertAgencyLocationQuery, {
+            replacements: association,
+            type: sequelize.QueryTypes.INSERT
+        })
+        .then(() => {
+            return {message: "Success! New Agency-Location association created."}
+        })
+        .catch(error => error);
+}
+
 // get condition using user type using userId and add new agency-location association
 function addAssociation(req, res){
     const currentUserId = parseInt(req.params.userId);
     getConditions(currentUserId, req)
+        // check if association exists, return the IDs if not
         .then(conditionJSON => {
             if(conditionJSON instanceof Error){
                 return res.status(404).send({message: conditionJSON.message});
             }
 
             // check if association already within table before inserting
-            const selectAssociationQuery = "SELECT * FROM `AgenciesLocations` WHERE agencyId=:agencyId AND locationId=:locationId";
-            sequelize
-                .query(selectAssociationQuery, {
-                    replacements: conditionJSON,
-                    type: sequelize.QueryTypes.SELECT
-                })
-                .then(associations => {
-                    if(associations.length !== 0){
-                        return res.status(404).send({message: 'Agency-Location association already exists!'});
+            return checkExisting(conditionJSON);
+        })
+        .then(association => {
+            if(association instanceof Error){
+                return res.status(400).send({message: association.message});
+            }
+
+            //Check that new associated user is an agency or location type
+            findUserType(currentUserId)
+                .then(userType => {
+                    // if not Agency or Location, cannot add
+                    if(userType !== 1 && userType !== 2){
+                        return res.status(400).send({message: "User is neither Agency nor Location. Cannot insert new Agency-Location association."});
                     }
 
-                    //Check that new associated user is an agency or location type
-                    findUserType(currentUserId)
-                        .then(userType => {
-                            // get the current user type. if agency, then only add in if other user is a location
-                            if(userType === 1){
-                                console.log("I am an Agency");
-                                const locationId = conditionJSON.locationId;
-                                findUserType(locationId)
-                                    .then(otherUserType => {
-                                        if(otherUserType === 2){
-                                            // raw query to insert new association if not already existing
-                                            const insertAgencyLocationQuery = "INSERT INTO `AgenciesLocations` (locationId, agencyId) VALUES (:locationId, :agencyId)";
-                                            sequelize
-                                                .query(insertAgencyLocationQuery, {
-                                                    replacements: conditionJSON,
-                                                    type: sequelize.QueryTypes.INSERT
-                                                })
-                                                .then(() => res.status(200).send({message: "Success! New Agency-Location association created."}));
-                                        }
-                                        return res.status(400).send({message: "Can't create association to Agency with non-Location user."});
-                                    });
-                            }
-                            else if(userType === 2){
-                                console.log("I am a Location");
-                                const agencyId = conditionJSON.agencyId;
-                                findUserType(agencyId)
-                                    .then(otherUserType => {
-                                        if(otherUserType === 1){
-                                            // raw query to insert new association if not already existing
-                                            const insertAgencyLocationQuery = "INSERT INTO `AgenciesLocations` (locationId, agencyId) VALUES (:locationId, :agencyId)";
-                                            sequelize
-                                                .query(insertAgencyLocationQuery, {
-                                                    replacements: conditionJSON,
-                                                    type: sequelize.QueryTypes.INSERT
-                                                })
-                                                .then(() => res.status(200).send({message: "Success! New Agency-Location association created."}));
-                                        }
-                                        return res.status(400).send({message: "Can't create association to Location with non-Agency user."});
-                                    });
-                            }
-                            return res.status(400).send({message: "User is neither Agency nor Location. Cannot insert new Agency-Location association."});
-                        });
+                    // get the current user type. if agency, then only add in if other user is a location
+                    if(userType === 1){
+                        console.log("I am an Agency");
+
+                        // verify that other user is actually a location
+                        const locationId = association.locationId;
+                        findUserType(locationId)
+                            .then(otherUserType => {
+                                if(otherUserType === 2){
+                                    // raw query to insert new association if not already existing
+                                    return insertAssociation(association);
+                                }
+                                return new Error("Cannot associate non-Location user to Agency.");
+                            })
+                            .then(result => {
+                                if(result instanceof Error){
+                                    return res.status(400).send({message: result.message});
+                                }
+                                return res.status(200).send(result);
+                            })
+                            .catch(error => res.status(400).send(error));
+                    }
+                    else if(userType === 2){
+                        console.log("I am a Location");
+
+                        // verify that other user is actually an agency
+                        const agencyId = association.agencyId;
+                        findUserType(agencyId)
+                            .then(otherUserType => {
+                                if(otherUserType === 1){
+                                    // raw query to insert new association if not already existing
+                                    return insertAssociation(association); 
+                                }  
+                                return new Error("Cannot associate non-Agency user to Location.");
+                            })
+                            .then(result => {
+                                if(result instanceof Error){
+                                    return res.status(400).send({message: result.message});
+                                }
+                                return res.status(200).send(result);
+                            })
+                            .catch(error => res.status(400).send(error));                        
+                        }
+                    });
                 })
-        })
-        .catch(error => res.status(400).send(error));
+                .catch(error => res.status(400).send(error));
 }
 
 // delete an association by querying for location ID and agency ID
@@ -139,43 +162,11 @@ function deleteAssociation(req, res){
 function getAllUserInfo(currentUserId, userType){
     if(userType === 1){
         // join with Agencies table
-        const agenciesJoinQuery = "SELECT * FROM `users` LEFT OUTER JOIN `Agencies` ON users.id = Agencies.userId \
-                                    UNION ALL SELECT * FROM `users` \
-                                    RIGHT OUTER JOIN `Agencies` ON users.id = Agencies.userId";
-        return sequelize
-            .query(agenciesJoinQuery, {
-                replacements: {userId: currentUserId},
-                type: sequelize.QueryTypes.SELECT
-            })
-            .then(users => {
-                if(users.length === 0){
-                    return new Error("User does not exist");
-                }
-
-                // search for row / info for current user
-                const targetUser = users.filter(user => user.id === currentUserId);
-                return targetUser[0];
-            });
+        return getGivenUserInfoAll(currentUserId, "Agencies");
     }
     else if(userType === 2){
         // join with Locations table
-        const locationsJoinQuery = "SELECT * FROM `users` LEFT OUTER JOIN `Locations` ON users.id = Locations.userId \
-                                    UNION ALL SELECT * FROM `users` \
-                                    RIGHT OUTER JOIN `Locations` ON users.id = Locations.userId";
-        return sequelize
-            .query(locationsJoinQuery, {
-                replacements: {userId: currentUserId},
-                type: sequelize.QueryTypes.SELECT
-            })
-            .then(users => {
-                if(users.length === 0){
-                    return new Error("User does not exist");
-                }
-
-                // search for row / info for current user
-                const targetUser = users.filter(user => user.id === currentUserId);
-                return targetUser[0];
-            });
+        return getGivenUserInfoAll(currentUserId, "Locations")
     }
     return Promise.resolve("User is neither an Agency nor a Location.");
 }
@@ -216,6 +207,11 @@ function retrieveAssociation(req, res){
                 return userType
             }
 
+            if(userType !== 2 && userType !== 1){
+                // return error if user is neither an agency or a location
+                return res.status(200).send({message: "Current User is neither an Agency nor a Location"});
+            }
+
             // if user is an agency then look for list of associated locations
             if(userType === 1){
                 const selectLocationsByAgency = "SELECT locationId FROM `AgenciesLocations` WHERE agencyId=:userId";
@@ -225,11 +221,7 @@ function retrieveAssociation(req, res){
             else if(userType === 2){
                 const selectAgenciesByLocation = "SELECT agencyId FROM `AgenciesLocations` WHERE locationId=:userId";
                 getAssociatedUsers(selectAgenciesByLocation, currentUserId, res);
-            }
-            else{
-                // return error if user is neither an agency or a location
-                return new Error("Current User is neither an Agency nor a Location");
-            }
+            }            
         })
         .catch(error => res.status(400).send(error));
 }

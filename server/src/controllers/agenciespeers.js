@@ -1,22 +1,5 @@
 const sequelize = require('../models').sequelize;
-
-// find user by user ID then get their user type
-// search for user id from req.params.userId in users table and get user type number
-function findUserType(currentUserId){
-    const selectByUserIdQuery = 'SELECT * FROM `users` WHERE id=:userId'
-    return sequelize
-        .query(selectByUserIdQuery, {
-            replacements: {userId: currentUserId},
-            type: sequelize.QueryTypes.SELECT
-        })
-        .then(users => {
-            if(!users){
-                return new Error("User Not Found.");
-            }
-            return users[0].user_type;
-        })
-        .catch(error => console.log(error));
-}
+const {findUserType, getGivenUserInfoAll} = require('../helpers/queryFunctions');
 
 // get what type of user currently signed in as to determine which values are going to be peerId and agencyId
 function getConditions(currentUserId, req){
@@ -50,74 +33,112 @@ function getConditions(currentUserId, req){
         });
 }
 
+// check if association already exists (given agency id and peer id)
+function checkExisting(identifications){
+    const selectAssociationQuery = "SELECT * FROM `AgenciesPeers` WHERE agencyId=:agencyId AND peerId=:peerId";
+    return sequelize
+        .query(selectAssociationQuery, {
+            replacements: identifications,
+            type: sequelize.QueryTypes.SELECT
+        })
+        .then(associations => {
+            if(associations.length !== 0){
+                return new Error('Agency-Peer association already exists!');
+            }
+
+            //return the agencyId and peerId if association not found
+            return identifications;
+        })
+        .catch(error => console.log(error));
+}
+
+// insert association into AgenciesPeers table
+function insertAssociation(association){
+    // raw query to insert new association
+    const insertAgencyPeerQuery = "INSERT INTO `AgenciesPeers` (peerId, agencyId) VALUES (:peerId, :agencyId)";
+    return sequelize
+        .query(insertAgencyPeerQuery, {
+            replacements: association,
+            type: sequelize.QueryTypes.INSERT
+        })
+        .then(() => {
+            return {message: "Success! New Agency-Peer association created."}
+        })
+        .catch(error => error);
+}
+
 // get condition using user type using userId and add new agency-peer association
 function addAssociation(req, res){
     const currentUserId = parseInt(req.params.userId);
     getConditions(currentUserId, req)
+        // check if association exists, return the IDs if not
         .then(conditionJSON => {
             if(conditionJSON instanceof Error){
                 return res.status(404).send({message: conditionJSON.message});
             }
 
             // check if association already within table before inserting
-            const selectAssociationQuery = "SELECT * FROM `AgenciesPeers` WHERE agencyId=:agencyId AND peerId=:peerId";
-            sequelize
-                .query(selectAssociationQuery, {
-                    replacements: conditionJSON,
-                    type: sequelize.QueryTypes.SELECT
-                })
-                .then(associations => {
-                    if(associations.length !== 0){
-                        return res.status(404).send({message: 'Agency-Peer association already exists!'});
+            return checkExisting(conditionJSON);
+        })
+        .then(association => {
+            if(association instanceof Error){
+                return res.status(400).send({message: association.message});
+            }
+
+            //Check that new associated user is an agency or peer type
+            findUserType(currentUserId)
+                .then(userType => {
+                    // if not Agency or Peer, cannot add
+                    if(userType !== 1 && userType !== 0){
+                        return res.status(400).send({message: "User is neither Agency nor Peer. Cannot insert new Agency-Peer association."});
                     }
 
-                    //Check that new associated user is an agency or peer type
-                    findUserType(currentUserId)
-                        .then(userType => {
-                            // get the current user type. if agency, then only add in if peerId id is a peer
-                            if(userType === 1){
-                                console.log("I am an Agency");
-                                const peerId = conditionJSON.peerId;
-                                findUserType(peerId)
-                                    .then(otherUserType => {
-                                        if(otherUserType === 0){
-                                            // raw query to insert new association if not already existing
-                                            const insertAgencyPeerQuery = "INSERT INTO `AgenciesPeers` (peerId, agencyId) VALUES (:peerId, :agencyId)";
-                                            sequelize
-                                                .query(insertAgencyPeerQuery, {
-                                                    replacements: conditionJSON,
-                                                    type: sequelize.QueryTypes.INSERT
-                                                })
-                                                .then(() => res.status(200).send({message: "Success! New Agency-Peer association created."}));
-                                        }
-                                        return res.status(400).send({message: "Can't create association to Agency with non-Peer user."});
-                                    })
-                                    .catch(error => console.log(error));
-                            }
-                            else if(userType === 0){
-                                console.log("I am a Peer");
-                                const agencyId = conditionJSON.agencyId;
-                                findUserType(agencyId)
-                                    .then(otherUserType => {
-                                        if(otherUserType === 1){
-                                            // raw query to insert new association if not already existing
-                                            const insertAgencyPeerQuery = "INSERT INTO `AgenciesPeers` (peerId, agencyId) VALUES (:peerId, :agencyId)";
-                                            sequelize
-                                                .query(insertAgencyPeerQuery, {
-                                                    replacements: conditionJSON,
-                                                    type: sequelize.QueryTypes.INSERT
-                                                })
-                                                .then(() => res.status(200).send({message: "Success! New Agency-Peer association created."}));
-                                        }
-                                        return res.status(400).send({message: "Can't create association to Peer with non-Agency user."});
-                                    });
-                            }
-                            
-                            return res.status(400).send({message: "User is neither Agency nor Peer. Cannot insert new Agency-Peer association."});
-                        });
+                    // get the current user type. if agency, then only add in if other user is a peer
+                    if(userType === 1){
+                        console.log("I am an Agency");
+
+                        // verify that other user is actually a peer
+                        const peerId = association.peerId;
+                        findUserType(peerId)
+                            .then(otherUserType => {
+                                if(otherUserType === 0){
+                                    // raw query to insert new association if not already existing
+                                    return insertAssociation(association);
+                                }
+                                return new Error("Cannot associate non-Peer user to Agency.");
+                            })
+                            .then(result => {
+                                if(result instanceof Error){
+                                    return res.status(400).send({message: result.message});
+                                }
+                                return res.status(200).send(result);
+                            })
+                            .catch(error => res.status(400).send(error));
+                    }
+                    else if(userType === 0){
+                        console.log("I am a Peer");
+
+                        // verify that other user is actually an agency
+                        const agencyId = association.agencyId;
+                        findUserType(agencyId)
+                            .then(otherUserType => {
+                                if(otherUserType === 1){
+                                    // raw query to insert new association if not already existing
+                                    return insertAssociation(association); 
+                                }  
+                                return new Error("Cannot associate non-Agency user to Peer.");
+                            })
+                            .then(result => {
+                                if(result instanceof Error){
+                                    return res.status(400).send({message: result.message});
+                                }
+                                return res.status(200).send(result);
+                            })
+                            .catch(error => res.status(400).send(error));                        
+                        }
+                    });
                 })
-        })
-        .catch(error => res.status(400).send(error));
+                .catch(error => res.status(400).send(error));
 }
 
 // delete an association by querying for peer ID and agency ID
@@ -141,43 +162,11 @@ function deleteAssociation(req, res){
 function getAllUserInfo(currentUserId, userType){
     if(userType === 1){
         // join with Agencies table
-        const agenciesJoinQuery = "SELECT * FROM `users` LEFT OUTER JOIN `Agencies` ON users.id = Agencies.userId \
-                                    UNION ALL SELECT * FROM `users` \
-                                    RIGHT OUTER JOIN `Agencies` ON users.id = Agencies.userId";
-        return sequelize
-            .query(agenciesJoinQuery, {
-                replacements: {userId: currentUserId},
-                type: sequelize.QueryTypes.SELECT
-            })
-            .then(users => {
-                if(users.length === 0){
-                    return new Error("User does not exist");
-                }
-
-                // search for row / info for current user
-                const targetUser = users.filter(user => user.id === currentUserId);
-                return targetUser[0];
-            });
+        return getGivenUserInfoAll(currentUserId, "Agencies");
     }
     else if(userType === 0){
         // join with Peers table
-        const peersJoinQuery = "SELECT * FROM `users` LEFT OUTER JOIN `Peers` ON users.id = Peers.userId \
-                                    UNION ALL SELECT * FROM `users` \
-                                    RIGHT OUTER JOIN `Peers` ON users.id = Peers.userId";
-        return sequelize
-            .query(peersJoinQuery, {
-                replacements: {userId: currentUserId},
-                type: sequelize.QueryTypes.SELECT
-            })
-            .then(users => {
-                if(users.length === 0){
-                    return new Error("User does not exist");
-                }
-
-                // search for row / info for current user
-                const targetUser = users.filter(user => user.id === currentUserId);
-                return targetUser[0];
-            });
+        return getGivenUserInfoAll(currentUserId, "Peers");
     }
     return Promise.resolve("User is neither an Agency nor a Peer.");
 }
@@ -215,7 +204,12 @@ function retrieveAssociation(req, res){
         .then(userType => {
             // return error if user not found in users table
             if(userType instanceof Error){
-                return userType
+                return res.status(200).send({message: "User's user type not found."});
+            }
+
+            if(userType !== 0 && userType !== 1){
+                // return error if user is neither an agency or a peer
+                return res.status(200).send({message: "Current User is neither an Agency nor a Peer"});
             }
 
             // if user is an agency then look for list of associated peers
@@ -227,10 +221,6 @@ function retrieveAssociation(req, res){
             else if(userType === 0){
                 const selectAgenciesByPeer = "SELECT agencyId FROM `AgenciesPeers` WHERE peerId=:userId";
                 getAssociatedUsers(selectAgenciesByPeer, currentUserId, res);
-            }
-            else{
-                // return error if user is neither an agency or a peer
-                return new Error("Current User is neither an Agency nor a Peer");
             }
         })
         .catch(error => res.status(400).send(error));
