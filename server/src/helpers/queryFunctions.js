@@ -52,8 +52,93 @@ function getGivenUserInfoAll(currentUserId, tableName){
         });
 }
 
+// inner join given table with users table (only accepts Agencies, Peers, or Locations)
+function usersInnerJoin(tableName){
+    if(tableName !== "Agencies" && tableName !== "Peers" && tableName !== "Locations"){
+        return Promise.resolve(`Cannot join ${tableName} with users table.`);
+    }
+
+    const joinQuery = `SELECT * FROM users INNER JOIN ${tableName} ON users.id = ${tableName}.userId`;
+    return sequelize
+        .query(joinQuery, {
+            type: sequelize.QueryTypes.SELECT
+        })
+        .then(users => {
+            return users;
+        });
+}
+
+// left join given table with users table (only accepts Agencies, Peers, or Locations)
+function usersLeftJoin(tableName){
+    if(tableName !== "Agencies" && tableName !== "Peers" && tableName !== "Locations"){
+        return Promise.resolve(`Cannot join ${tableName} with users table.`);
+    }
+
+    const joinQuery = `SELECT * FROM users LEFT JOIN ${tableName} ON users.id = ${tableName}.userId`;
+    return sequelize
+        .query(joinQuery, {
+            type: sequelize.QueryTypes.SELECT
+        })
+        .then(users => {
+            return users;
+        });
+}
+
+// left join given table with users table (only accepts Agencies, Peers, or Locations)
+function usersRightJoin(tableName){
+    if(tableName !== "Agencies" && tableName !== "Peers" && tableName !== "Locations"){
+        return Promise.resolve(`Cannot join ${tableName} with users table.`);
+    }
+
+    const joinQuery = `SELECT * FROM users LEFT JOIN ${tableName} ON users.id = ${tableName}.userId`;
+    return sequelize
+        .query(joinQuery, {
+            type: sequelize.QueryTypes.SELECT
+        })
+        .then(users => {
+            return users;
+        });
+}
+
+// get user ID from params
+function getUserId(req){
+    return {userId: parseInt(req.params.userId)};
+};
+
+// get specified user info from user table
+function getGivenUserInfo(currentUserId){
+  const selectUserQuery = 'SELECT * FROM `users` WHERE id=:userId LIMIT 1';
+  return sequelize
+    .query(selectUserQuery, {
+        replacements: {
+            userId: parseInt(currentUserId)
+        },
+        type: sequelize.QueryTypes.SELECT
+    })
+    .then(users => {
+        return users[0];
+    })
+    .catch(error => error);
+}
+
+// delete user by id
+function deleteGivenUser(currentUserId){
+    const deleteQuery = "DELETE FROM users WHERE id=:userId";
+    return sequelize
+        .query(deleteQuery, {
+            replacements: {userId: currentUserId}
+        })
+        .then(() => {return {message: "Success! User deleted."}});
+}
+
 module.exports = {
     findUserType,
     usersFullOuterJoin,
     getGivenUserInfoAll,
+    getGivenUserInfo,
+    deleteGivenUser,
+    getUserId,
+    usersInnerJoin,
+    usersLeftJoin,
+    usersRightJoin
 };
