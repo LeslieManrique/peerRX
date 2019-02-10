@@ -107,18 +107,18 @@ function getUserId(req){
 
 // get specified user info from user table
 function getGivenUserInfo(currentUserId){
-  const selectUserQuery = 'SELECT * FROM `users` WHERE id=:userId LIMIT 1';
-  return sequelize
-    .query(selectUserQuery, {
-        replacements: {
-            userId: parseInt(currentUserId)
-        },
-        type: sequelize.QueryTypes.SELECT
-    })
-    .then(users => {
-        return users[0];
-    })
-    .catch(error => error);
+    const selectUserQuery = 'SELECT * FROM `users` WHERE id=:userId LIMIT 1';
+    return sequelize
+        .query(selectUserQuery, {
+            replacements: {
+                userId: parseInt(currentUserId)
+            },
+            type: sequelize.QueryTypes.SELECT
+        })
+        .then(users => {
+            return users[0];
+        })
+        .catch(error => error);
 }
 
 // delete user by id
@@ -131,12 +131,37 @@ function deleteGivenUser(currentUserId){
         .then(() => {return {message: "Success! User deleted."}});
 }
 
+// update specified user info - given user's current values and new form values
+function updateGivenUserInfo(user, req){
+    const updateByUserIdQuery = 'UPDATE `users` SET first_name = :first_name, last_name = :last_name, email_address = :email_address, phone_number = :phone_number WHERE id=:userId';
+    const currentUserId = user.userId;
+    return getGivenUserInfo(currentUserId)
+      .then(userInfo =>{
+          return sequelize
+              .query(updateByUserIdQuery, {
+                  replacements: {
+                      userId: userInfo.id,
+                      first_name: req.body.first_name || userInfo.first_name,
+                      last_name: req.body.last_name || userInfo.last_name,
+                      email_address: req.body.email_address || userInfo.email_address,
+                      phone_number: req.body.phone_number || userInfo.phone_number
+                  },
+                  type: sequelize.QueryTypes.UPDATE
+              })
+              .then(() => {
+                  return {message: "Successfully Updated!"};
+              })
+              .catch(error => error);
+            });
+}
+
 module.exports = {
     findUserType,
     usersFullOuterJoin,
     getGivenUserInfoAll,
     getGivenUserInfo,
     deleteGivenUser,
+    updateGivenUserInfo,
     getUserId,
     usersInnerJoin,
     usersLeftJoin,
