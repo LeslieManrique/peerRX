@@ -1,33 +1,22 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('users', {
+    return queryInterface.createTable('HourItems', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      first_name: {
+      day_of_week: {
+        allowNull: false,
+        type: Sequelize.ENUM('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')
+      },
+      time_in: {
         allowNull: false,
         type: Sequelize.STRING
       },
-      last_name: {
-        type: Sequelize.STRING
-      },
-      email_address: {
-        allowNull: false,
-        type: Sequelize.STRING
-      },
-      user_type: {
-        allowNull: false,
-        type: Sequelize.INTEGER
-      },
-      phone_number: {
-        allowNull: false,
-        type: Sequelize.STRING
-      },
-      password: {
+      time_out: {
         allowNull: false,
         type: Sequelize.STRING
       },
@@ -38,10 +27,20 @@ module.exports = {
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
+      },
+      hoursListId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        onDelete: 'CASCADE',
+        reference: {
+          model: 'HoursLists',
+          key: 'id',
+          as: 'hoursListId'
+        }
       }
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('users');
+    return queryInterface.dropTable('HourItems');
   }
 };
