@@ -1,6 +1,7 @@
 const Agency = require('../models').Agency;
 const {getCoordinatePoint} = require('../helpers/geocode');
-const {getGivenUserInfoAll, getUserId, usersLeftJoin, getGivenUserInfo, usersInnerJoin, deleteGivenUser} = require('../helpers/queryFunctions');
+const {getGivenUserInfoAll, getUserId, usersLeftJoin, getGivenUserInfo, 
+        usersInnerJoin, deleteGivenUser, updateGivenUserInfo} = require('../helpers/queryFunctions');
 const sequelize = require('../models').sequelize;
 
 // add new agency
@@ -75,38 +76,23 @@ function retrieve(req, res){
         .catch(error => res.status(400).send(error));
 }
 
-// update user info for specified user
-function updateUserInfo(user, req){
-  const updateByUserIdQuery = 'UPDATE `users` SET first_name = :first_name, last_name = :last_name, email_address = :email_address, phone_number = :phone_number WHERE id=:userId';
-  const currentUserId = user.userId;
-  return getGivenUserInfo(currentUserId)
-    .then(userInfo =>{
-        return sequelize
-            .query(updateByUserIdQuery, {
-                replacements: {
-                    userId: userInfo.id,
-                    first_name: req.body.first_name || userInfo.first_name,
-                    last_name: req.body.last_name || userInfo.last_name,
-                    email_address: req.body.email_address || userInfo.email_address,
-                    phone_number: req.body.phone_number || userInfo.phone_number
-                },
-                type: sequelize.QueryTypes.UPDATE
-            })
-            .then(() => {
-                console.log("Successfully Updated!");
+// update user info for specified user and return all of users info
+function getAllUpdatedInfo(user, req){
+    const currentUserId = user.userId;
+    return updateGivenUserInfo(user, req)
+        .then(result => {
+            console.log(result.message);
 
-                // return the joined full info of updated agency
-                return usersInnerJoin("Agencies")
-                    .then(users => {
-                        const specifiedUser = users.filter(user => {
-                            return user.id === currentUserId;
-                        });
-                        return specifiedUser[0];
+            // return the joined full info of updated agency with user info
+            return usersInnerJoin("Agencies")
+                .then(users => {
+                    const specifiedUser = users.filter(user => {
+                        return user.id === currentUserId;
                     });
-            })
-            .catch(error => error);
-    })
-    .catch(error => error);
+                    return specifiedUser[0];
+                });
+        })
+        .catch(error => error);
 }
 
 // update specified agency info (allows updates in users table too)
@@ -128,7 +114,7 @@ function update(req, res){
                 })
                 .then(updatedAgency => {
                     const updatedAgencyInfo = updatedAgency.dataValues;
-                    return updateUserInfo(updatedAgencyInfo, req);
+                    return getAllUpdatedInfo(updatedAgencyInfo, req);
                 })
                 .catch(error => res.status(400).send(error));
         })
