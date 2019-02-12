@@ -5,7 +5,8 @@ const bodyParser = require('body-parser');
 const expressValidator = require('express-validator')
 const http = require('http');
 //app imports
-const { userRouter, interestRouter, agencyRouter, peerRouter, locationRouter, agenciesLocationsRouter, agenciesPeersRouter } = require('./routers'); //require our routes/
+const { userRouter, interestRouter, agencyRouter, peerRouter, locationRouter, agenciesLocationsRouter, agenciesPeersRouter,
+        hoursListRouter, hourItemRouter } = require('./routers'); //require our routes/
 // Constants
 const PORT = process.env.PORT || 8080;
 const HOST = '0.0.0.0';
@@ -51,6 +52,8 @@ app.use(peerRouter);
 app.use(locationRouter);
 app.use(agenciesLocationsRouter);
 app.use(agenciesPeersRouter);
+app.use(hoursListRouter);
+app.use(hourItemRouter);
 
 // All remaining requests return the React app, so it can handle routing.
 app.get('*', function(request, response) {
