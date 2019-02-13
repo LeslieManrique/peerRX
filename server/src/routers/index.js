@@ -6,5 +6,6 @@ module.exports = {
     agenciesLocationsRouter: require('./agencieslocations'),
     agenciesPeersRouter: require('./agenciespeers'),
     hoursListRouter: require('./hourslist'),
-    hourItemRouter: require('./houritem')
+    hourItemRouter: require('./houritem'),
+    userSpecialtiesRouter: require('./userspecialties')
 }
