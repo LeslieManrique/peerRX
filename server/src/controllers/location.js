@@ -1,9 +1,9 @@
 const Location = require('../models').Location;
 const {getCoordinatePoint} = require('../helpers/geocode');
-const {getUserId, usersLeftJoin,
-        usersInnerJoin, getGivenUserInfoAll,
-        getGivenUserInfo, deleteGivenUser, 
-        updateGivenUserInfo} = require('../helpers/queryFunctions');
+const {getUserId, usersLeftJoin, usersInnerJoin, getGivenUserInfoAll,
+        getGivenUserInfo, deleteGivenUser, updateGivenUserEmail, isAddressChanged} = require('../helpers/queryFunctions');
+// user type 2 is a location
+const LOCATION_TYPE = 2;
 
 // add new location
 function create(req, res){
@@ -12,7 +12,7 @@ function create(req, res){
         .then(user => {
             // check that it is not already in Location table
             if(user){
-                return res.status(400).send({message: "Location already exists."});
+                return res.status(201).send({message: "Location already exists."});
             }
 
             // check that userId exists in users table
@@ -20,12 +20,14 @@ function create(req, res){
                 .then(user => {
                     if(user){
                         // check that user is a Location before adding to Location table
-                        if(user.user_type !== 2){
+                        if(user.user_type !== LOCATION_TYPE){
                             return res.status(201).send({message: "User not a Location"});
                         }
 
                         return Location
                             .create({
+                                name: req.body.name,
+                                phone_number: req.body.phone_number,
                                 address1: req.body.address1,
                                 address2: req.body.address2,
                                 city: req.body.city,
@@ -51,7 +53,7 @@ function list(req, res){
     usersLeftJoin("Locations")
         .then(users => {
             const locations = users.filter(user => {
-                return user.user_type === 2;
+                return user.user_type === LOCATION_TYPE;
             });
             res.status(200).send(locations);
         })
@@ -64,12 +66,12 @@ function retrieve(req, res){
     getGivenUserInfoAll(locationId, "Locations")
         .then(location => {
             if(!location){
-                return res.status(404).send({message: 'User Not Found'});
+                return res.status(201).send({message: 'User Not Found'});
             }
 
             //check that user is an Location
-            if(location.user_type !== 2){
-                return res.status(400).send({message: "No Location with given ID exists."})
+            if(location.user_type !== LOCATION_TYPE){
+                return res.status(201).send({message: "No Location with given ID exists."})
             }
 
             return res.status(200).send(location);
@@ -80,7 +82,7 @@ function retrieve(req, res){
 // update user info for specified user
 function getAllUpdatedInfo(user, req){
     const currentUserId = user.userId;
-    return updateGivenUserInfo(user, req)
+    return updateGivenUserEmail(user, req)
         .then(result => {
             console.log(result.message);
 
@@ -107,6 +109,14 @@ function update(req, res){
                 return new Error('Location Not Found');
             }
 
+            // check if address changed
+            if(isAddressChanged(location, req)){
+                // updated req.body with new coordinate_point
+                const newCoords = getCoordinatePoint(req.body.address1, req.body.address2, 
+                    req.body.city, req.body.state, req.body.zipcode);
+                req.body["coordinate_point"] = newCoords;
+            }
+
             // update Locations table entries, then update users table entries
             // get and send the updated info from both Locations and users table 
             return location
@@ -117,12 +127,13 @@ function update(req, res){
                     const updatedLocationInfo = updatedLocation.dataValues;
                     return getAllUpdatedInfo(updatedLocationInfo, req);
                 })
-                .catch(error => res.status(400).send(error));
+                .catch(error => error);
         })
         .then(updatedLocation => {
             if(updatedLocation instanceof Error){
                 return res.status(400).send({message: updatedLocation.message});
             }
+
             return res.status(200).send(updatedLocation);
         })
         .catch(error => res.status(400).send(error));
@@ -135,7 +146,7 @@ function destroy(req,res){
         .findOne({ where: getUserId(req) })
         .then(location => {
             if(!location){
-                return res.status(404).send({ message: 'Location Not Found' });
+                return res.status(201).send({ message: 'Location Not Found' });
             }
 
             return location

@@ -1,9 +1,12 @@
 const sequelize = require('../models').sequelize;
 
+// choose only id, email_address, and user_type columns; don't send out passwords from db
+const VIEWABLE_USER_COLS = `users.id, users.email_address, users.user_type`;
+
 // find user by user ID then get their user type
 // search for user id from req.params.userId in users table and get user type number
 function findUserType(currentUserId){
-    const selectByUserIdQuery = 'SELECT * FROM `users` WHERE id=:userId'
+    const selectByUserIdQuery = `SELECT ${VIEWABLE_USER_COLS} FROM users WHERE id=:userId;`;
     return sequelize
         .query(selectByUserIdQuery, {
             replacements: {userId: currentUserId},
@@ -24,11 +27,11 @@ function usersFullOuterJoin(tableName){
         return Promise.resolve(`Cannot join ${tableName} with users table.`);
     }
 
-    const joinQuery = `SELECT * FROM users LEFT OUTER JOIN ${tableName} \
-                                ON users.id = ${tableName}.userId \
-                                UNION ALL SELECT * FROM users \
-                                RIGHT OUTER JOIN ${tableName} \
-                                ON users.id = ${tableName}.userId`;
+    const joinQuery =  `SELECT ${VIEWABLE_USER_COLS}, ${tableName}.* FROM \
+                        users LEFT OUTER JOIN ${tableName} ON users.id = ${tableName}.userId \
+                        UNION ALL \
+                        SELECT ${VIEWABLE_USER_COLS}, ${tableName}.* FROM \
+                        users RIGHT OUTER JOIN ${tableName} ON users.id = ${tableName}.userId;`;
     return sequelize
         .query(joinQuery, {
             type: sequelize.QueryTypes.SELECT
@@ -58,7 +61,7 @@ function usersInnerJoin(tableName){
         return Promise.resolve(`Cannot join ${tableName} with users table.`);
     }
 
-    const joinQuery = `SELECT * FROM users INNER JOIN ${tableName} ON users.id = ${tableName}.userId`;
+    const joinQuery = `SELECT ${VIEWABLE_USER_COLS}, ${tableName}.* FROM users INNER JOIN ${tableName} ON users.id = ${tableName}.userId;`;
     return sequelize
         .query(joinQuery, {
             type: sequelize.QueryTypes.SELECT
@@ -74,7 +77,7 @@ function usersLeftJoin(tableName){
         return Promise.resolve(`Cannot join ${tableName} with users table.`);
     }
 
-    const joinQuery = `SELECT * FROM users LEFT JOIN ${tableName} ON users.id = ${tableName}.userId`;
+    const joinQuery = `SELECT ${VIEWABLE_USER_COLS}, ${tableName}.* FROM users LEFT JOIN ${tableName} ON users.id = ${tableName}.userId;`;
     return sequelize
         .query(joinQuery, {
             type: sequelize.QueryTypes.SELECT
@@ -90,7 +93,7 @@ function usersRightJoin(tableName){
         return Promise.resolve(`Cannot join ${tableName} with users table.`);
     }
 
-    const joinQuery = `SELECT * FROM users LEFT JOIN ${tableName} ON users.id = ${tableName}.userId`;
+    const joinQuery = `SELECT ${VIEWABLE_USER_COLS}, ${tableName}.* FROM users RIGHT JOIN ${tableName} ON users.id = ${tableName}.userId;`;
     return sequelize
         .query(joinQuery, {
             type: sequelize.QueryTypes.SELECT
@@ -107,7 +110,7 @@ function getUserId(req){
 
 // get specified user info from user table
 function getGivenUserInfo(currentUserId){
-    const selectUserQuery = 'SELECT * FROM `users` WHERE id=:userId LIMIT 1';
+    const selectUserQuery = `SELECT ${VIEWABLE_USER_COLS} FROM users WHERE id=:userId LIMIT 1;`;
     return sequelize
         .query(selectUserQuery, {
             replacements: {
@@ -123,7 +126,7 @@ function getGivenUserInfo(currentUserId){
 
 // delete user by id
 function deleteGivenUser(currentUserId){
-    const deleteQuery = "DELETE FROM users WHERE id=:userId";
+    const deleteQuery = "DELETE FROM users WHERE id=:userId;";
     return sequelize
         .query(deleteQuery, {
             replacements: {userId: currentUserId}
@@ -132,8 +135,8 @@ function deleteGivenUser(currentUserId){
 }
 
 // update specified user info - given user's current values and new form values
-function updateGivenUserInfo(user, req){
-    const updateByUserIdQuery = 'UPDATE `users` SET first_name = :first_name, last_name = :last_name, email_address = :email_address, phone_number = :phone_number WHERE id=:userId';
+function updateGivenUserEmail(user, req, ){
+    const updateByUserIdQuery = 'UPDATE users SET email_address = :email_address WHERE id=:userId;';
     const currentUserId = user.userId;
     return getGivenUserInfo(currentUserId)
       .then(userInfo =>{
@@ -141,10 +144,7 @@ function updateGivenUserInfo(user, req){
               .query(updateByUserIdQuery, {
                   replacements: {
                       userId: userInfo.id,
-                      first_name: req.body.first_name || userInfo.first_name,
-                      last_name: req.body.last_name || userInfo.last_name,
-                      email_address: req.body.email_address || userInfo.email_address,
-                      phone_number: req.body.phone_number || userInfo.phone_number
+                      email_address: req.body.email_address || userInfo.email_address
                   },
                   type: sequelize.QueryTypes.UPDATE
               })
@@ -155,15 +155,34 @@ function updateGivenUserInfo(user, req){
             });
 }
 
+// given user's original address and updated form values, determine if new coordinate point needs to be gotten
+function isAddressChanged(currentUserInfo, req){
+    // check if address1, address2, city, state, zipcode are changed
+    const addressParts = ["address1", "address2", "city", "state", "zipcode"];
+    const changedParts = addressParts.filter(part => {
+        if(!req.body[part]){
+            return false;
+        }
+        return currentUserInfo[part] !== req.body[part];
+    });
+
+    // if any part of the address is altered, then address has changed
+    if(changedParts.length === 0){
+        return false;
+    }
+    return true;
+}
+
 module.exports = {
     findUserType,
     usersFullOuterJoin,
     getGivenUserInfoAll,
     getGivenUserInfo,
     deleteGivenUser,
-    updateGivenUserInfo,
+    updateGivenUserEmail,
     getUserId,
     usersInnerJoin,
     usersLeftJoin,
-    usersRightJoin
+    usersRightJoin,
+    isAddressChanged
 };

@@ -1,5 +1,8 @@
 const Peer = require('../models').Peer;
-const {getGivenUserInfoAll, getUserId, usersLeftJoin, getGivenUserInfo, usersInnerJoin, deleteGivenUser, updateGivenUserInfo} = require('../helpers/queryFunctions');
+const {getGivenUserInfoAll, getUserId, usersLeftJoin, getGivenUserInfo, 
+    usersInnerJoin, deleteGivenUser, updateGivenUserEmail} = require('../helpers/queryFunctions');
+// user type 0 is a peer
+const PEER_TYPE = 0; 
 
 // add new peer
 function create(req, res){
@@ -8,7 +11,7 @@ function create(req, res){
         .then(users => {
             // check that it is not already in Peer table
             if(users){
-                return res.status(400).send({message: "Peer already exists."});
+                return res.status(201).send({message: "Peer already exists."});
             }
 
             // check that userId exists in users table
@@ -16,17 +19,20 @@ function create(req, res){
                 .then(user => {
                     if(user){
                         // check that user is a Peer before adding to Peer table
-                        if(user.user_type !== 0){
+                        if(user.user_type !== PEER_TYPE){
                             return res.status(201).send({message: "User not a Peer"});
                         }
 
                         return Peer
                             .create({
+                                first_name: req.body.first_name,
+                                last_name: req.body.last_name,
+                                phone_number: req.body.phone_number,
                                 certifications: req.body.certifications,
                                 training_certs: req.body.training_certs,
                                 userId: req.params.userId
                             })
-                            .then(peer => res.status(201).send(peer))
+                            .then(peer => res.status(200).send(peer))
                             .catch(error => res.status(400).send(error));
                     }
                     else{
@@ -42,9 +48,9 @@ function list(req, res){
     usersLeftJoin("Peers")
         .then(users => {
             const peers = users.filter(user => {
-                return user.user_type === 0;
+                return user.user_type === PEER_TYPE;
             });
-            res.status(200).send(peers);
+            return res.status(200).send(peers);
         })
         .catch(error => res.status(400).send(error));
 }
@@ -55,12 +61,12 @@ function retrieve(req, res){
     getGivenUserInfoAll(peerId, "Peers")
         .then(peer => {
             if(!peer){
-                return res.status(404).send({message: 'User Not Found'});
+                return res.status(201).send({message: 'User Not Found'});
             }
 
             //check that user is an Peer
-            if(peer.user_type !== 0){
-                return res.status(400).send({message: "No Peer with given ID exists."})
+            if(peer.user_type !== PEER_TYPE){
+                return res.status(201).send({message: "No Peer with given ID exists."})
             }
 
             return res.status(200).send(peer);
@@ -71,7 +77,7 @@ function retrieve(req, res){
 // update user info for specified user
 function getAllUpdatedInfo(user, req){
     const currentUserId = user.userId;
-    return updateGivenUserInfo(user, req)
+    return updateGivenUserEmail(user, req)
         .then(result => {
             console.log(result.message);
 
@@ -108,7 +114,7 @@ function update(req, res){
                     const updatedPeerInfo = updatedPeer.dataValues;
                     return getAllUpdatedInfo(updatedPeerInfo, req);
                 })
-                .catch(error => res.status(400).send(error));
+                .catch(error => error);
         })
         .then(updatedPeer => {
             if(updatedPeer instanceof Error){
@@ -126,7 +132,7 @@ function destroy(req,res){
         .findOne({ where: getUserId(req) })
         .then(peer => {
             if(!peer){
-                return res.status(404).send({ message: 'Peer Not Found' });
+                return res.status(201).send({ message: 'Peer Not Found' });
             }
 
             return peer

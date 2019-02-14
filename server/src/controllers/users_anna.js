@@ -1,8 +1,9 @@
 const users = require('../models').users;
 const { check } = require('express-validator/check');
-const { usersInnerJoin, updateGivenUserInfo} = require('../helpers/queryFunctions');
-const userTypeDict = {0: "Peer", 1: "Agency", 2: "Location"};
-const sequelize = require('../models').sequelize;
+const { usersInnerJoin } = require('../helpers/queryFunctions');
+
+// Defines what the user is based on user_type value
+const userTypeDict = { 0: "Peers", 1: "Agencies", 2: "Locations" };
 
 // add new user
 function create(req, res) {
@@ -10,11 +11,8 @@ function create(req, res) {
   console.log(req.body)
   return users
     .create({
-      first_name: req.body.first_name,
-      last_name: req.body.last_name,
       email_address: req.body.email_address,
       user_type: req.body.user_type,
-      phone_number: req.body.phone_number,
       password: req.body.password,
     })
     .then(users => res.status(201).send(users))
@@ -29,8 +27,7 @@ function getFullInfo(user){
   // determine which table to join with based on user type
   const tableName = getUserTableName(userType);
   if(!tableName){
-    return Promise.resolve({message: "User is not a Peer, Agency, or Location.",
-                            user_info: user});
+    return Promise.resolve({message: "User is not a Peer, Agency, or Location.", user_info: user});
   }
 
   return usersInnerJoin(tableName)
@@ -41,8 +38,7 @@ function getFullInfo(user){
 
         // new user may not be in their appropriate tables yet so return just user info
         if(specifiedUser.length === 0){
-          return {message: `User is a(n) ${userTypeDict[userType]} but not yet finished registering.`,
-                  user_info: user};
+          return {message: `User is a(n) ${userTypeDict[userType]} but not yet finished registering.`, user_info: user};
         }
 
         return specifiedUser[0];
@@ -53,7 +49,7 @@ function getFullInfo(user){
 function list(req, res) {
   return users
     .findAll({
-      attributes: ['first_name', 'last_name','id','email_address','user_type','phone_number']
+      attributes: ['id','email_address','user_type']
     })
     .then((users) => {
       const fullInfo = users.map(user => {
@@ -72,12 +68,8 @@ function list(req, res) {
 function getUserTableName(userType){
   let tableName = undefined;
   // determine which table to join with based on user type
-  if(userType === 0){
-    tableName = "Peers";
-  } else if(userType === 1){
-    tableName = "Agencies";
-  } else if(userType === 2){
-    tableName = "Locations";
+  if(userType === 0 || userType === 1 || userType === 2){
+    tableName = userTypeDict[userType];
   }
   return tableName;
 }
@@ -88,7 +80,7 @@ function retrieve(req, res){
     .findOne({where: {id: parseInt(req.params.userId)}})
     .then(user => {
       if(!user){
-        return res.status(404).send({message: "User Not Found"})
+        return res.status(201).send({message: "User Not Found"})
       }
 
       // returns full user info from related tables
@@ -134,7 +126,7 @@ function update(req, res){
     .findOne({ where: {id: parseInt(req.params.userId)} })
     .then(user => {
       if(!user){
-        return res.status(404).send({message: 'User Not Found'});
+        return res.status(201).send({message: 'User Not Found'});
       }
 
       // update users table entries
@@ -163,7 +155,7 @@ function destroy(req, res){
     .findOne({where: {id: parseInt(req.params.userId)}})
     .then(user => {
       if(!user){
-        return res.status(404).send({message: 'User Not Found'});
+        return res.status(201).send({message: 'User Not Found'});
       }
 
       return user

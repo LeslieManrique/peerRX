@@ -1,8 +1,9 @@
 const Agency = require('../models').Agency;
 const {getCoordinatePoint} = require('../helpers/geocode');
 const {getGivenUserInfoAll, getUserId, usersLeftJoin, getGivenUserInfo, 
-        usersInnerJoin, deleteGivenUser, updateGivenUserInfo} = require('../helpers/queryFunctions');
-const sequelize = require('../models').sequelize;
+        usersInnerJoin, deleteGivenUser, updateGivenUserEmail, isAddressChanged} = require('../helpers/queryFunctions');
+// constant, user type 1 is agency
+const AGENCY_TYPE = 1;
 
 // add new agency
 function create(req, res){
@@ -19,12 +20,14 @@ function create(req, res){
             getGivenUserInfo(req.params.userId)
                 .then(user => {
                     if(user){
-                        if(user.user_type !== 1){
+                        if(user.user_type !== AGENCY_TYPE){
                             return res.status(201).send({message: "User not an Agency"});
                         }
 
                         return Agency
                             .create({
+                                name: req.body.name,
+                                phone_number: req.body.phone_number,
                                 address1: req.body.address1,
                                 address2: req.body.address2,
                                 city: req.body.city,
@@ -50,7 +53,7 @@ function list(req, res){
     usersLeftJoin("Agencies")
         .then(users => {
             const agencies = users.filter(user => {
-                return user.user_type === 1;
+                return user.user_type === AGENCY_TYPE;
             });
             res.status(200).send(agencies);
         })
@@ -67,7 +70,7 @@ function retrieve(req, res){
             }
 
             //check that user is an Agency
-            if(agency.user_type !== 1){
+            if(agency.user_type !== AGENCY_TYPE){
                 return res.status(400).send({message: "No Agency with given ID exists."})
             }
 
@@ -79,7 +82,7 @@ function retrieve(req, res){
 // update user info for specified user and return all of users info
 function getAllUpdatedInfo(user, req){
     const currentUserId = user.userId;
-    return updateGivenUserInfo(user, req)
+    return updateGivenUserEmail(user, req)
         .then(result => {
             console.log(result.message);
 
@@ -106,6 +109,14 @@ function update(req, res){
                 return new Error('Agency Not Found');
             }
 
+            // check if address changed
+            if(isAddressChanged(agency, req)){
+                // updated req.body with new coordinate_point
+                const newCoords = getCoordinatePoint(req.body.address1, req.body.address2, 
+                    req.body.city, req.body.state, req.body.zipcode);
+                req.body["coordinate_point"] = newCoords;
+            }
+
             // update Agencies table entries, then update users table entries
             // get and send the updated info from both Agencies and users table 
             return agency
@@ -116,7 +127,7 @@ function update(req, res){
                     const updatedAgencyInfo = updatedAgency.dataValues;
                     return getAllUpdatedInfo(updatedAgencyInfo, req);
                 })
-                .catch(error => res.status(400).send(error));
+                .catch(error => error);
         })
         .then(updatedAgency => {
             if(updatedAgency instanceof Error){
