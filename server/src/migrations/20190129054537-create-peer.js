@@ -13,6 +13,18 @@ module.exports = {
           as: 'userId'
         }
       },
+      first_name: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      last_name: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      phone_number: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
       certifications: {
         type: Sequelize.BOOLEAN
       },

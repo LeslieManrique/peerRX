@@ -6,6 +6,14 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       allowNull: false
     },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    phone_number: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     address1: {
       type: DataTypes.STRING,
       allowNull: false
