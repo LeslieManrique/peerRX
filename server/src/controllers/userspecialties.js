@@ -1,8 +1,12 @@
 const UserSpecialties = require('../models').UserSpecialties;
 const sequelize = require('../models').sequelize;
+const {getAllSpecialties} = require('../helpers/getSpecialties');
 
 // specialties
-const specialtiesDict = { 0: "Specialty0", 1: "Specialty1", 2: "Specialty2"};
+// const specialtiesDict = { 0: "Specialty0", 1: "Specialty1", 2: "Specialty2"};
+// get specialties from SpecialtyItems table
+let specialtiesDict = {};
+getAllSpecialties().then(result => specialtiesDict = result);
 
 // check that user exists 
 function checkUserExists(currentUserId){
