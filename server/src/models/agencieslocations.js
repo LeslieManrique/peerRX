@@ -13,5 +13,9 @@ module.exports = (sequelize, DataTypes) => {
   AgenciesLocations.associate = function(models) {
     // associations can be defined here
   };
+
+  // remove the id column that is added in by sequelize when there is no primary key
+  AgenciesLocations.removeAttribute('id');
+  
   return AgenciesLocations;
 };
