@@ -1,6 +1,12 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const SpecialtyItem = sequelize.define('SpecialtyItem', {
+    id: {
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+      type: DataTypes.INTEGER
+    },
     description: {
       type: DataTypes.STRING,
       allowNull:false
