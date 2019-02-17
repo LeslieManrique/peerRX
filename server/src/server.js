@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const expressValidator = require('express-validator')
 const http = require('http');
 //app imports
-const { userRouter, interestRouter } = require('./routers'); //require our routes/
+const { userRouter, interestRouter, signupRouter, adminRouter, loginRouter } = require('./routers'); //require our routes/
 // Constants
 const PORT = process.env.PORT || 8080;
 const HOST = '0.0.0.0';
@@ -19,38 +19,44 @@ const app = express();
 // app.use(express.static(CLIENT_BUILD_PATH));
 app.use(logger('dev'));
 
+//middleware 
+//require('./services/auth');
+
 //Parse incoming requests 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true}));
 
 app.use(expressValidator())
+
+
 // API
 app.get('/',(req,res)=>{
-  return res.redirect('/interest')
+  return res.redirect('/login')
 })
 
 app.get('/api', (req, res) => {
   res.set('Content-Type', 'application/json');
   let data = {
-    message: 'Hello world, Woooooeeeee!!!!\nImma take you home with meeee (Tpain)'
+    message: 'Nothing Here Yet UwU'
   };
   res.send(JSON.stringify(data, null, 2));
 });
-app.get('/api/torb', (req, res) => {
-  res.set('Content-Type', 'application/json');
-  let data = {
-    message: "You're making a chiken out of a feather!"
-  };
-  res.send(JSON.stringify(data, null, 2));
-});
+
 app.use(userRouter);
 app.use(interestRouter);
+app.use(signupRouter);
+app.use(loginRouter);
+app.use(adminRouter);
 // All remaining requests return the React app, so it can handle routing.
 app.get('*', function(request, response) {
   response.send('Welcome to the beginning of nothingness!')
   // response.sendFile(path.join(CLIENT_BUILD_PATH, 'index.html'));
 });
-
+//Handle errors
+app.use(function(err, req, res, next) {
+  res.status(err.status || 500);
+  res.json({ error : err });
+});
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
 
