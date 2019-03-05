@@ -85,7 +85,6 @@ module.exports = {
                 res.status(400).json({"success":true, "message":"Unable to delete"});
             })
     }, 
-
     list: (req, res) => {
       return interest
         .findAll({
@@ -93,8 +92,6 @@ module.exports = {
         })
         .then((interest)=> res.status(200).send(interest))
         .catch((error)=> res.status(400).send(error))
-        
       }
-    
   };
 

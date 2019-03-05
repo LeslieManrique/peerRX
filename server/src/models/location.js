@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     address2: {
       type: DataTypes.STRING,
-      allowNull: false
+      defaultValue: ''
     },
     city: {
       type: DataTypes.STRING,
@@ -53,3 +53,5 @@ module.exports = (sequelize, DataTypes) => {
   };
   return Location;
 };
+
+//add before save functuon that populates coordinates 

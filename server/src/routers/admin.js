@@ -11,5 +11,4 @@ router
 router
   .delete('/admin/interestedUsers/:id', authenticateAdmin, interestController.delInterestById)
 
-
 module.exports = router;

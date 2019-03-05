@@ -5,7 +5,8 @@ const router = new express.Router();
 const usersController = require('../controllers').users;
 
 router
-    .post('/signupAdmin', usersController.createAdmin);
+    .post('/signupAdmin', usersController.createAdmin)
+    .post('/signupUser', usersController.createUser)
 // router
 //     .post('/signupAgency', usersController.createAgency);
 // router

@@ -1,7 +1,8 @@
 const sequelize = require('../models').sequelize;
 
 // choose only id, email_address, and user_type columns; don't send out passwords from db
-const VIEWABLE_USER_COLS = `users.id, users.email_address, users.user_type`;
+const VIEWABLE_USER_COLS = `users.id, users.email_address, users.user_type, users.approved`;
+const VIEWABLE_USER_COLS_ALT = `users.email_address`;
 
 // find user by user ID then get their user type
 // search for user id from req.params.userId in users table and get user type number
@@ -21,6 +22,8 @@ function findUserType(currentUserId){
         .catch(error => console.log(error));
 }
 
+//DEPRECATED ... Query has some optimization concerns --- may slow down server due to UNION ALL and unecessary
+//full table joins
 // full outer join given table with users table (only accepts Agencies, Peers, or Locations)
 function usersFullOuterJoin(tableName){
     if(tableName !== "Agencies" && tableName !== "Peers" && tableName !== "Locations"){
@@ -41,6 +44,29 @@ function usersFullOuterJoin(tableName){
         });
 }
 
+
+function getUserProfile(currentUserId, tableName){
+    console.log("Hello")
+    if(tableName !== "Agencies" && tableName !== "Peers" && tableName !== "Locations"){
+        return Promise.resolve(`Cannot join ${tableName} with users table.`);
+    }
+    const query = `SELECT ${VIEWABLE_USER_COLS_ALT}, user_types.user_type_name, \ 
+                   ${tableName}.* FROM users, ${tableName}, user_types WHERE users.id = ${currentUserId} and users.user_type = user_types.user_type;`;
+    console.log("Query --", query)
+    return sequelize
+    .query(query, {
+        type: sequelize.QueryTypes.SELECT
+    })
+    .then(users => {
+        console.log(users)
+        if(users.length === 0){
+            return Promise.resolve(`No ${tableName}`);
+        }
+        console.log("users..", users);
+        return users[0];
+    });
+}
+
 // gets info from users table and given table for a given user ID
 function getGivenUserInfoAll(currentUserId, tableName){
     return usersFullOuterJoin(tableName)
@@ -48,7 +74,7 @@ function getGivenUserInfoAll(currentUserId, tableName){
             if(users.length === 0){
                 return Promise.resolve(`No ${tableName}`);
             }
-
+            console.log("users..", users);
             // search for row / info for current user
             const targetUser = users.filter(user => user.id === currentUserId);
             return targetUser[0];
@@ -76,7 +102,6 @@ function usersLeftJoin(tableName){
     if(tableName !== "Agencies" && tableName !== "Peers" && tableName !== "Locations"){
         return Promise.resolve(`Cannot join ${tableName} with users table.`);
     }
-
     const joinQuery = `SELECT ${VIEWABLE_USER_COLS}, ${tableName}.* FROM users LEFT JOIN ${tableName} ON users.id = ${tableName}.userId;`;
     return sequelize
         .query(joinQuery, {
@@ -157,6 +182,7 @@ function updateGivenUserEmail(user, req, ){
 
 // given user's original address and updated form values, determine if new coordinate point needs to be gotten
 function isAddressChanged(currentUserInfo, req){
+    console.log("function isAddressChanged")
     // check if address1, address2, city, state, zipcode are changed
     const addressParts = ["address1", "address2", "city", "state", "zipcode"];
     const changedParts = addressParts.filter(part => {
@@ -168,6 +194,7 @@ function isAddressChanged(currentUserInfo, req){
 
     // if any part of the address is altered, then address has changed
     if(changedParts.length === 0){
+        console.log("No parts Changed")
         return false;
     }
     return true;
@@ -184,5 +211,6 @@ module.exports = {
     usersInnerJoin,
     usersLeftJoin,
     usersRightJoin,
-    isAddressChanged
+    isAddressChanged,
+    getUserProfile
 };

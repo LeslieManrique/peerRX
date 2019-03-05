@@ -3,7 +3,7 @@ const { check } = require('express-validator/check');
 const { usersInnerJoin } = require('../helpers/queryFunctions');
 
 // Defines what the user is based on user_type value
-const userTypeDict = { 0: "Peers", 1: "Agencies", 2: "Locations" };
+const userTypeDict = { 0: "Peers", 1: "Agencies", 2: "Locations", 3: "Admin"};
 
 // add new user
 function create(req, res) {
