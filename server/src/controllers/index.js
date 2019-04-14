@@ -7,6 +7,7 @@ const agenciespeers = require('./agenciespeers');
 const houritems = require('./houritem');
 const hourslist = require('./hourslist');
 const specialtyitems = require('./specialtyitem');
+const interest = require('./interest')
 
 module.exports= {
     users,
@@ -17,5 +18,6 @@ module.exports= {
     agenciespeers,
     houritems,
     hourslist,
-    specialtyitems
+    specialtyitems,
+    interest
 };

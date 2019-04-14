@@ -1,6 +1,6 @@
 const interest = require('../models').interest;
 const { body, getValidationResult }  = require('express-validator/check');
-const sendInterestRequest = require('../modules/mailer').sendInterestRequest;
+const sendInterestRequest = require('../services/mailer').sendInterestRequest;
 
 const submitInterestErrorFormatter = result => {
     if (!result.isEmpty()){
@@ -66,13 +66,32 @@ module.exports = {
         })
      
     },
+    delInterestById: (req, res)=> {
+        console.log(req.params.id)
+        const id = req.params.id;
+        return interest
+            .destroy({where: {id:id}
+            })
+            .then(result => {
+                if(result >= 1){
+                    res.status(200).json({"success":true, "message":"successful deletion"});
+                }
+                else{
+                    res.status(200).json({"success":true, "message":"no rows deleted"});
+                }
+
+              })
+            .catch((error) => {
+                res.status(400).json({"success":true, "message":"Unable to delete"});
+            })
+    }, 
     list: (req, res) => {
       return interest
         .findAll({
-          attributes: ['name','email','user_type','phone_number', 'organization']
+          attributes: ['id','name','email','user_type','phone_number', 'organization']
         })
-        .then((interest) => res.status(200).send(interest))
-        .catch((error) => res.status(400).send(error))
+        .then((interest)=> res.status(200).send(interest))
+        .catch((error)=> res.status(400).send(error))
       }
   };
 
