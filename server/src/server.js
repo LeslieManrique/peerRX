@@ -7,8 +7,9 @@ const http = require('http');
 //app imports
 //const { userRouter, interestRouter, agencyRouter, peerRouter, locationRouter, agenciesLocationsRouter, agenciesPeersRouter,
 //        hoursListRouter, hourItemRouter, userSpecialtiesRouter, signupRouter, adminRouter, loginRouter } = require('./routers'); //require our routes/
-const {userRouter, interestRouter, signupRouter, adminRouter, loginRouter, locationRouter} = require('./routers');
+//const {userRouter, interestRouter, signupRouter, adminRouter, loginRouter, locationRouter, agencyRouter, peerRouter} = require('./routers');
 // Constants 
+const {userRouter, interestRouter, signupRouter, adminRouter, loginRouter, agencyRouter, peerRouter} = require('./routers');
 const PORT = process.env.PORT || 8080;
 const HOST = '0.0.0.0';
 
@@ -49,10 +50,9 @@ app.use(interestRouter);
 app.use(signupRouter);
 app.use(loginRouter);
 app.use(adminRouter);
-app.use(locationRouter);
-
-// app.use(agencyRouter);
-// app.use(peerRouter);
+// app.use(locationRouter);
+app.use(agencyRouter);
+app.use(peerRouter);
 // app.use(locationRouter);
 // app.use(agenciesLocationsRouter);
 // app.use(agenciesPeersRouter);

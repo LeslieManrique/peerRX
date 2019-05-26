@@ -3,7 +3,8 @@ const router = new express.Router();
 const usersController = require('../controllers').users;
 
 router
-  .get('/users',usersController.list)
+  //leave this for debugging only 
+  .get('/users',usersController.list) 
   .post('/users', usersController.createUser) //can create any type of user except admin
   .get('/find_user/:userId', usersController.retrieve)
   .delete('/delete_user/:userId', usersController.destroy)

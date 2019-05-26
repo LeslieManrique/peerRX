@@ -1,16 +1,20 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const Agency = sequelize.define('Agency', {
-    userId: {
+  const agencies = sequelize.define('agencies', {
+    agency_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      allowNull: false
+      allowNull: false,
     },
     name: {
       type: DataTypes.STRING,
       allowNull: false
     },
     phone_number: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    country: {
       type: DataTypes.STRING,
       allowNull: false
     },
@@ -34,21 +38,36 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    coordinate_point: {
+    main_contact_first_name: {
       type: DataTypes.STRING,
       allowNull: false
-    }
-  }, {});
+    },
+    main_contact_last_name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    main_contact_phone_number:{
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    main_contact_email_address:{
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+
+  }, {
+    timestamps: false
+  });
   
-  Agency.associate = function(models) {
+  agencies.associate = function(models) {
     // associations can be defined here
 
     // an Agency is a type of User
-    Agency.belongsTo(models.users, {
-    	primaryKey: 'userId',
-    	onDelete: 'CASCADE'
-    });
+    // agencies.belongsTo(models.users, {
+    // 	primaryKey: 'agency_id',
+    // 	onDelete: 'CASCADE'
+    // });
   };
   
-  return Agency;
+  return agencies;
 };

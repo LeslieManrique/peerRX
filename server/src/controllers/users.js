@@ -1,18 +1,22 @@
 const users = require('../models').users;
 const { check } = require('express-validator/check');
-const { usersInnerJoin } = require('../helpers/queryFunctions');
+const { usersInnerJoin, approveUserToggle, getUserTypeName } = require('../helpers/queryFunctions');
 // services/auth.js for registration
 // change this to controllers/admin 
-const userTypeDict = { 0: "Peers", 1: "Agencies", 2: "Locations", 3: "Admin"};
 
-function createUser(req, res) {
+// const userTypeDict = { 0: "Peers", 1: "Agencies", 2: "Locations", 3: "Admin"};
+
+
+const createUser = async(req, res) =>{
+  const user_type_name =  await getUserTypeName(req.body.user_type);
   if(!req.body.email_address  && !req.body.password && !req.body.user_type){
     return res.json({"success":false, "message":"please fill out all required fields"});
   }
-  if(!(req.body.user_type in userTypeDict)){
-    return res.json({"success":false, "message":"Incorrect User Type"});
+  if(!user_type_name){
+    return res.json({"success":false, "message":"invalid user type"});
   }
-  if(userTypeDict[req.body.user_type]=="Admin"){
+  if(user_type_name=="admin"){
+    console.log("user type is admin");
     return res.json({"success":false, "message":"invalid user type"});
   }
   return users
@@ -28,27 +32,6 @@ function createUser(req, res) {
     });
 }
 
-
-function createAdmin(req, res) {
-  if(!req.body.email_address  && !req.body.password && !req.body.user_type){
-    return res.json({"success":false, "message":"please fill out all required fields"});
-  }
-  if(userTypeDict[req.body.user_type]!="Admin"){
-    return res.json({"success":false, "message":"Incorrect User Type"});
-  }
-  return users
-    .create({
-      email_address: req.body.email_address,
-      password: req.body.password,
-      user_type: req.body.user_type
-    })
-    .then(user => res.status(201).res.json({"success":true, "message":"Added New User"}))
-    .catch(error => {
-      const errorObject = {"status":false, "message": error.errors[0]["message"]};
-      return res.status(400).send(errorObject);
-    });
-}
-
 function list(req, res) {
   return users
     .findAll({
@@ -57,7 +40,6 @@ function list(req, res) {
     .then((users) => res.status(200).send(users))
     .catch((error) => res.status(400).send(error))
 }
-
 // get user specified by ID
 function retrieve(req, res){
   return users
@@ -96,12 +78,55 @@ function destroy(req, res){
     });
 }
 
+const approveUser = async (type, req, res) => {
+  console.log("APPROVE FUNCTION");
+  console.log(type, res, res);
+  let user = null;
+  try{
+      user = await users.findOne({where: {id: parseInt(req.params.id)}, attributes: ['id','email_address','user_type', 'approved']})
+  }
+  catch (error) {
+      return res.status(400).send(error);
+  }
+
+  let can_approve = false
+
+  if(type == "admin"){
+    can_approve = true
+  }
+  else if(type == "agency"){
+    if(user.user_type == 0 || user.user_type == 1){
+      can_approve = true
+    }
+    else{
+      can_approve = false
+    }
+  }
+  else{
+    can_approve = false
+  }
+
+  if (can_approve == true){
+    try{
+      await users.update({approved:approveUserToggle(user)},{where:{id:parseInt(user.id)}});
+      res.json({success:true, message: "User approval value changed"});
+    }
+    catch(error){
+      res.status(400).send(error)
+    }
+  }
+  else{
+    res.json({success:true, message: "User approval value cannot be changed"});
+  }
+}
+
+
 module.exports = {
   createUser,
-  createAdmin,
   list,
   retrieve,
-  destroy
+  destroy,
+  approveUser
 };
     
     

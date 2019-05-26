@@ -1,4 +1,5 @@
 const sequelize = require('../models').sequelize;
+const user_types = require('../models').user_types;
 
 // choose only id, email_address, and user_type columns; don't send out passwords from db
 const VIEWABLE_USER_COLS = `users.id, users.email_address, users.user_type, users.approved`;
@@ -6,6 +7,77 @@ const VIEWABLE_USER_COLS_ALT = `users.email_address`;
 
 // find user by user ID then get their user type
 // search for user id from req.params.userId in users table and get user type number
+
+const getUserTypeName = async(user_id) => {
+
+    const user_type = await user_types.findOne({where:{user_type : user_id}});
+
+    if(!user_type){
+    return; 
+    }
+    else{
+        return user_type.user_type_name;
+    }
+}
+
+const getUserTypeFromName = async(type_name) => {
+    const user_type_data = await user_types.findOne({where:{user_type_name:type_name}});
+    if(!user_type_data){
+        return;
+    }
+    else{
+        return user_type_data.user_type; 
+    }
+}
+
+const getAssociatedPeerExists = async(parentId, peerEmail, role)=>{
+    let query = null;
+    if(role == 'agency'){
+        query = `SELECT * FROM agency_peers JOIN (SELECT * FROM peers WHERE email_address = ${peerEmail}) tb WHERE `
+    }
+    return null
+}
+//agencies list 
+const getDataByParam = async(obj, table) => {
+    console.log("FUNCTION GETDATABYPARAM");
+    console.log('obj -- ', obj);
+    console.log('table --',table);
+    const cols = '`name`, `phone_number`, `country`, `address1`, `address2`, `city`, `state`, `zipcode`';
+    let getQuery = ''
+    //cols - [state, zip]
+    if(obj.zipcode && obj.state){
+        getQuery = `SELECT ${cols} FROM ${table} WHERE state = '${obj.state}' AND zipcode = '${obj.zipcode}';`;
+        console.log(getQuery);
+    }
+    else if(obj.state){
+        getQuery = `SELECT ${cols} FROM ${table} WHERE state = '${obj.state}';`;
+        console.log(getQuery);
+    }
+    else if(obj.zipcode){
+        getQuery = `SELECT ${cols} FROM ${table} WHERE zipcode = '${obj.zipcode}';`;
+        console.log(getQuery);
+    }
+    else{
+        getQuery = `SELECT ${cols} FROM ${table};`;
+
+
+        console.log(getQuery);
+    }
+    
+    return sequelize
+        .query(getQuery, {
+            type: sequelize.QueryTypes.SELECT
+        })
+        .then(res => {
+            if(!res){
+                return new Error("No data retrieved.");
+            }
+            return res; 
+        })
+        .catch(error => console.log("error--",error));
+
+
+}
 function findUserType(currentUserId){
     const selectByUserIdQuery = `SELECT ${VIEWABLE_USER_COLS} FROM users WHERE id=:userId;`;
     return sequelize
@@ -26,7 +98,7 @@ function findUserType(currentUserId){
 //full table joins
 // full outer join given table with users table (only accepts Agencies, Peers, or Locations)
 function usersFullOuterJoin(tableName){
-    if(tableName !== "Agencies" && tableName !== "Peers" && tableName !== "Locations"){
+    if(tableName !== "agencies" && tableName !== "[eers" && tableName !== "locations"){
         return Promise.resolve(`Cannot join ${tableName} with users table.`);
     }
 
@@ -47,10 +119,10 @@ function usersFullOuterJoin(tableName){
 
 function getUserProfile(currentUserId, tableName){
     console.log("Hello")
-    if(tableName !== "Agencies" && tableName !== "Peers" && tableName !== "Locations"){
+    if(tableName !== "agencies" && tableName !== "peers" && tableName !== "locations"){
         return Promise.resolve(`Cannot join ${tableName} with users table.`);
     }
-    const query = `SELECT ${VIEWABLE_USER_COLS_ALT}, user_types.user_type_name, \ 
+    const query = `SELECT ${VIEWABLE_USER_COLS_ALT}, user_types.user_type_name, user_types.user_type, \ 
                    ${tableName}.* FROM users, ${tableName}, user_types WHERE users.id = ${currentUserId} and users.user_type = user_types.user_type;`;
     console.log("Query --", query)
     return sequelize
@@ -128,13 +200,14 @@ function usersRightJoin(tableName){
         });
 }
 
-// get user ID from params
+// get user ID from params (delete this)
 function getUserId(req){
     return {userId: parseInt(req.params.userId)};
 };
 
 // get specified user info from user table
 function getGivenUserInfo(currentUserId){
+    console.log("user query");
     const selectUserQuery = `SELECT ${VIEWABLE_USER_COLS} FROM users WHERE id=:userId LIMIT 1;`;
     return sequelize
         .query(selectUserQuery, {
@@ -149,6 +222,18 @@ function getGivenUserInfo(currentUserId){
         .catch(error => error);
 }
 
+function approveUserToggle(user){
+    console.log("approve user toggle.--------")
+    let approve_val = user.approved;
+    if(user.approved == false){
+      approve_val = true;
+    }
+    else{
+      approve_val = false;
+    }
+    return approve_val
+
+  };
 // delete user by id
 function deleteGivenUser(currentUserId){
     const deleteQuery = "DELETE FROM users WHERE id=:userId;";
@@ -212,5 +297,9 @@ module.exports = {
     usersLeftJoin,
     usersRightJoin,
     isAddressChanged,
-    getUserProfile
+    getUserProfile,
+    approveUserToggle,
+    getUserTypeName,
+    getUserTypeFromName,
+    getDataByParam
 };
