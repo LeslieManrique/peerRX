@@ -9,19 +9,14 @@ const agency_name = 'agency'
 
 // add new agency
 const create = async(req, res)=>{
-    console.log("creating agency profile...")
     AGENCY_TYPE = await getUserTypeFromName(agency_name);
-    console.log("AGENCY TYPE = ", AGENCY_TYPE);
     return agency
         .findOne({where: {agency_id: req.params.userId}})
         .then(users => {
-            console.log("Testttt");
             // check that it is not already in Agency table
             if(users){
-                console.log(users.dataValues);
                 return res.status(400).send({message: "Agency already exists."});
             }
-            console.log("----");
             // check that userId exists in users table
             getGivenUserInfo(req.params.userId)
                 .then(user => {
@@ -42,7 +37,7 @@ const create = async(req, res)=>{
                                 zipcode: req.body.zipcode,
                                 coordinate_point: getCoordinatePoint(req.body.address1, req.body.address2, 
                                                     req.body.city, req.body.state, req.body.zipcode),
-                                agency_id: req.params.userId,
+                                agency_id: parseInt(req.params.userId),
                                 main_contact_first_name: req.body.main_contact_first_name,
                                 main_contact_last_name: req.body.main_contact_last_name,
                                 main_contact_phone_number: req.body.main_contact_phone_number,
@@ -63,11 +58,12 @@ const create = async(req, res)=>{
 }
 
 // list agencies
+// todo - delete
 const list= async(req, res)=>{
     AGENCY_TYPE = await getUserTypeFromName(agency_name);
     console.log("AGENCY TYPE = ", AGENCY_TYPE);
     console.log("list agencies");
-    usersLeftJoin("Agencies")
+    usersLeftJoin("agencies")
         .then(users => {
             const agencies = users.filter(user => {
                 return user.user_type === AGENCY_TYPE;
@@ -82,7 +78,7 @@ const list= async(req, res)=>{
 // retrieve info of specified agency
 const retrieve = async(req, res) =>{
     console.log("retrieving")
-    AGENCY_TYPE = await getUserTypeFromName(agency_name);
+    const AGENCY_TYPE = await getUserTypeFromName(agency_name);
     console.log("AGENCY TYPE = ", AGENCY_TYPE);
     const agencyId = parseInt(req.params.userId);
     getUserProfile(agencyId, "agencies")

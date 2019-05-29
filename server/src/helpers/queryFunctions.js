@@ -1,5 +1,6 @@
 const sequelize = require('../models').sequelize;
 const user_types = require('../models').user_types;
+const users = require('../models').users;
 
 // choose only id, email_address, and user_type columns; don't send out passwords from db
 const VIEWABLE_USER_COLS = `users.id, users.email_address, users.user_type, users.approved`;
@@ -8,9 +9,46 @@ const VIEWABLE_USER_COLS_ALT = `users.email_address`;
 // find user by user ID then get their user type
 // search for user id from req.params.userId in users table and get user type number
 
+const registerUser = async(req, res)=>{
+    console.log("registerUser");
+    console.log(req.body);
+    const user_type_name = await getUserTypeName(req.body.user_type);
+    if(!req.body.email_address && !req.body.password && !req.body.user_type){
+        console.log('error 1');
+        return null;
+    }
+    if(!user_type_name){
+        console.log('error 2');
+      return null;
+    }
+    if(user_type_name == "admin"){
+        console.log('error 3');
+      return null;
+    }
+    return users
+      .create({
+        email_address: req.body.email_address,
+        password: req.body.password,
+        user_type: req.body.user_type
+      })
+      .then(user => {
+          console.log('user --', user);
+        return user.id;
+      })
+      .catch(error => {
+          console.log(error);
+        return null;
+      });
+  }
 const getUserTypeName = async(user_id) => {
-
-    const user_type = await user_types.findOne({where:{user_type : user_id}});
+    let user_type = null;
+    try{
+        user_type = await user_types.findOne({where:{user_type : user_id}});
+    }
+    catch(error){
+        console.log("get user type from name");
+        console.log(error);
+    }
 
     if(!user_type){
     return; 
@@ -42,7 +80,7 @@ const getDataByParam = async(obj, table) => {
     console.log("FUNCTION GETDATABYPARAM");
     console.log('obj -- ', obj);
     console.log('table --',table);
-    const cols = '`name`, `phone_number`, `country`, `address1`, `address2`, `city`, `state`, `zipcode`';
+    const cols = '`name`, `phone_number`, `address1`, `address2`, `city`, `state`, `zipcode`';
     let getQuery = ''
     //cols - [state, zip]
     if(obj.zipcode && obj.state){
@@ -171,7 +209,8 @@ function usersInnerJoin(tableName){
 
 // left join given table with users table (only accepts Agencies, Peers, or Locations)
 function usersLeftJoin(tableName){
-    if(tableName !== "Agencies" && tableName !== "Peers" && tableName !== "Locations"){
+    console.log("users left join");
+    if(tableName !== "agencies" && tableName !== "locations"){
         return Promise.resolve(`Cannot join ${tableName} with users table.`);
     }
     const joinQuery = `SELECT ${VIEWABLE_USER_COLS}, ${tableName}.* FROM users LEFT JOIN ${tableName} ON users.id = ${tableName}.userId;`;
@@ -301,5 +340,6 @@ module.exports = {
     approveUserToggle,
     getUserTypeName,
     getUserTypeFromName,
-    getDataByParam
+    getDataByParam,
+    registerUser
 };

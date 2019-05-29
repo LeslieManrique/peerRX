@@ -7,7 +7,7 @@ const {authenticateAdmin, authenticateAgency, isApproved, canAccessParam} = requ
 router
     .post('/agency/add/:userId', authenticateAgency, agencyController.create)
     //.post('/add_agency/:userId', agencyController.create)
-    .get('/agency/all', [authenticateAdmin, isApproved], agencyController.list)
+    // .get('/agency/all', [authenticateAdmin, isApproved], agencyController.list)
 
     .get('/profile/agency/:userId', [authenticateAgency, canAccessParam], agencyController.retrieve)
     //.get('/find_agency/:userId', agencyController.retrieve)

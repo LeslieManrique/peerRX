@@ -6,7 +6,30 @@ const { usersInnerJoin, approveUserToggle, getUserTypeName } = require('../helpe
 
 // const userTypeDict = { 0: "Peers", 1: "Agencies", 2: "Locations", 3: "Admin"};
 
-
+const registerUser = async(req, res)=>{
+  const user_type_name = await getUserTypeName(req.body.user_type);
+  if(!req.body.email_address && !req.body.password && !req.body.user_type){
+    return null;
+  }
+  if(!user_type_name){
+    return null;
+  }
+  if(user_type_name == "admin"){
+    return null;
+  }
+  return users
+    .create({
+      email_address: req.body.email_address,
+      password: req.body.password,
+      user_type: req.body.user_type
+    })
+    .then(user => {
+      return user.id;
+    })
+    .catch(error => {
+      return null;
+    });
+}
 const createUser = async(req, res) =>{
   const user_type_name =  await getUserTypeName(req.body.user_type);
   if(!req.body.email_address  && !req.body.password && !req.body.user_type){
@@ -112,7 +135,7 @@ const approveUser = async (type, req, res) => {
       res.json({success:true, message: "User approval value changed"});
     }
     catch(error){
-      res.status(400).send(error)
+      res.status(400).s|end(error)
     }
   }
   else{

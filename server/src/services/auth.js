@@ -12,6 +12,7 @@ const verifyRelationship = async (req, res, next) => {
         const token = req.headers['authorization'].split(' ')[1];
         const decoded = jwt.verify(token, secret);
         req.userdata = decoded['data']['user']
+        console.log(req.userdata);
         //const role = userTypeDict[req.userdata['user_type']];
         //admin can approve all types of users accounts
         const role = getUserTypeName(req.userdata['user_type']);
@@ -122,9 +123,10 @@ const authenticateLocation = async (req, res, next) => {
         req.userdata = decoded['data']['user'];
         console.log(req.userdata)
         // const role = userTypeDict[req.userdata['user_type']];
-        const role = getUserTypeName(req.userdata['user_type']);
+        const role = await getUserTypeName(req.userdata['user_type']);
         console.log("role\t", role)
-        if(role != 'Locations' || role != 'Admin'){
+        if(role != 'location' && role != 'admin'){
+            console.log("not a location and not an admin");
             return res.status(401).send("Authorization token error");
         }
         console.log("user data:\t", req.userdata)
