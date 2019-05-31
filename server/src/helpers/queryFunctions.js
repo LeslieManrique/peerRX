@@ -68,13 +68,6 @@ const getUserTypeFromName = async(type_name) => {
     }
 }
 
-const getAssociatedPeerExists = async(parentId, peerEmail, role)=>{
-    let query = null;
-    if(role == 'agency'){
-        query = `SELECT * FROM agency_peers JOIN (SELECT * FROM peers WHERE email_address = ${peerEmail}) tb WHERE `
-    }
-    return null
-}
 //agencies list 
 const getDataByParam = async(obj, table) => {
     console.log("FUNCTION GETDATABYPARAM");

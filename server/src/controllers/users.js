@@ -6,30 +6,7 @@ const { usersInnerJoin, approveUserToggle, getUserTypeName } = require('../helpe
 
 // const userTypeDict = { 0: "Peers", 1: "Agencies", 2: "Locations", 3: "Admin"};
 
-const registerUser = async(req, res)=>{
-  const user_type_name = await getUserTypeName(req.body.user_type);
-  if(!req.body.email_address && !req.body.password && !req.body.user_type){
-    return null;
-  }
-  if(!user_type_name){
-    return null;
-  }
-  if(user_type_name == "admin"){
-    return null;
-  }
-  return users
-    .create({
-      email_address: req.body.email_address,
-      password: req.body.password,
-      user_type: req.body.user_type
-    })
-    .then(user => {
-      return user.id;
-    })
-    .catch(error => {
-      return null;
-    });
-}
+
 const createUser = async(req, res) =>{
   const user_type_name =  await getUserTypeName(req.body.user_type);
   if(!req.body.email_address  && !req.body.password && !req.body.user_type){
@@ -63,26 +40,26 @@ function list(req, res) {
     .then((users) => res.status(200).send(users))
     .catch((error) => res.status(400).send(error))
 }
-// get user specified by ID
-function retrieve(req, res){
-  return users
-    .findOne({where: {id: parseInt(req.params.userId)}, attributes: ['id','email_address','user_type', 'approved']})
-    .then(user => {
-      if(!user){
-        return res.status(201).send({message: "User Not Found"})
-      }
-      else{
-        return res.status(200).send(user)
-      }
 
-      // returns full user info from related tables
-      // if user is not as expected, a message is also returned
-      // return getFullInfo(user)
-      //   .then(fullInfo => {
-      //     return res.status(200).send(fullInfo);
-      //   });
-    })
-    .catch(error => res.status(400).send(error));
+// retrieve info of specified agency
+const retrieve = async(req, res) =>{
+  console.log("retrieving")
+  const location_type = await getUserTypeFromName(location_name);
+  const locationId = parseInt(req.params.userId);
+  getUserProfile(locationId, "locations")
+      .then(location => {
+          if(!location){
+              return res.status(404).send({message: 'User Not Found'});
+          }
+          console.log("---\n", location);
+          //check that user is an Agency
+          if(location.user_type !== location_type){
+              return res.status(400).send({message: "No location with given ID exists."})
+          }
+
+          return res.status(200).send(location);
+      })
+      .catch(error => res.status(400).send(error));
 }
 
 // delete user from users table (user is also deleted from Peer/Agency/Location table)

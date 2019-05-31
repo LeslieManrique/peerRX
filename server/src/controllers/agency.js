@@ -2,23 +2,34 @@ const agency = require('../models').agencies;
 const users = require('../models').users;
 const {getCoordinatePoint} = require('../helpers/geocode');
 const {getGivenUserInfoAll, getUserId, usersLeftJoin, getGivenUserInfo, 
-        usersInnerJoin, deleteGivenUser, updateGivenUserEmail, isAddressChanged, getUserTypeFromName, getUserProfile, getDataByParam } = require('../helpers/queryFunctions');
+        usersInnerJoin, deleteGivenUser, updateGivenUserEmail, isAddressChanged, getUserTypeFromName, getUserProfile, getDataByParam, registerUser } = require('../helpers/queryFunctions');
 // constant, user type 1 is agency
 const get_type = async() => { AGENCY_TYPE =  await getUserTypeFromName('agency')};
 const agency_name = 'agency'
 
 // add new agency
 const create = async(req, res)=>{
-    AGENCY_TYPE = await getUserTypeFromName(agency_name);
+    let registration_id = '';
+    try{
+        registration_id = await registerUser(req, res);
+    }
+    catch(error){
+        console.log(error);
+        return res.status(400).send(error);
+    }
+    if(registration_id == null){
+        return res.status(400).send("user could not be registered");
+    }
+    const AGENCY_TYPE = await getUserTypeFromName(agency_name);
     return agency
-        .findOne({where: {agency_id: req.params.userId}})
+        .findOne({where: {agency_id: registration_id}})
         .then(users => {
             // check that it is not already in Agency table
             if(users){
                 return res.status(400).send({message: "Agency already exists."});
             }
             // check that userId exists in users table
-            getGivenUserInfo(req.params.userId)
+            getGivenUserInfo(registration_id)
                 .then(user => {
                     if(user){
                         if(parseInt(user.user_type) !== AGENCY_TYPE){
@@ -37,7 +48,7 @@ const create = async(req, res)=>{
                                 zipcode: req.body.zipcode,
                                 coordinate_point: getCoordinatePoint(req.body.address1, req.body.address2, 
                                                     req.body.city, req.body.state, req.body.zipcode),
-                                agency_id: parseInt(req.params.userId),
+                                agency_id: parseInt(registration_id),
                                 main_contact_first_name: req.body.main_contact_first_name,
                                 main_contact_last_name: req.body.main_contact_last_name,
                                 main_contact_phone_number: req.body.main_contact_phone_number,
@@ -45,16 +56,23 @@ const create = async(req, res)=>{
                             })
                             .then(agency => res.status(201).send(agency))
                             .catch(error => {
+                                users.destroy({where:{id:registration_id}});
+
                                 console.log(error);
                                 res.status(400).send(error)
                             });
                     }
                     else{
+                        users.destroy({where:{id:registration_id}});
+
                         return res.status(201).send({message: "User Not Found"});
                     }
                 });
         })
-        .catch(error => res.status(400).send(error));
+        .catch(error => {
+            users.destroy({where:{id:registration_id}});
+            res.status(400).send(error)
+        });
 }
 
 // list agencies

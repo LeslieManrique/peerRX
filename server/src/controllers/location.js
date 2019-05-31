@@ -82,17 +82,17 @@ const create = async(req, res)=>{
 }
 
 // list locations
-// function list(req, res){
+function list(req, res){
 
-//     usersLeftJoin("Locations")
-//         .then(users => {
-//             const locations = users.filter(user => {
-//                 return user.user_type === LOCATION_TYPE;
-//             });
-//             res.status(200).send(locations);
-//         })
-//         .catch(error => res.status(400).send(error));
-// }
+    usersLeftJoin("locations")
+        .then(users => {
+            const locations = users.filter(user => {
+                return user.user_type === LOCATION_TYPE;
+            });
+            res.status(200).send(locations);
+        })
+        .catch(error => res.status(400).send(error));
+}
 
 // retrieve info of specified location
 function retrieve(req, res){
@@ -100,7 +100,7 @@ function retrieve(req, res){
     const location_type = getUserTypeFromName(location_name);
     console.log("location type = ", location_type);
     // getGivenUserInfoAll(locationId, "Locations")
-    getUserProfile(locationId, "Locations")
+    getUserProfile(locationId, "locations")
         .then(location => {
             if(!location){
                 return res.status(404).send({"message": 'User Not Found'});
@@ -199,33 +199,14 @@ function destroy(req, res){
           .catch(error => res.status(400).send(error));
       });
   }
-// delete specified location from Locations and users tables
-// function destroy(req,res){
-//     const currentUserId = parseInt(req.params.userId);
-//     return location
-//         .findOne({ where: {location_id: currentUserId} })
-//         .then(location => {
-//             if(!location){
-//                 return res.status(201).send({ "message": 'Location Not Found' });
-//             }
 
-//             return location
-//                 .destroy()
-//                 .then(() => {
-//                     // delete location from users table
-//                     return deleteGivenUser(currentUserId)
-//                 })
-//                 .then(deletedUserMessage => {res.status(200).send({message: deletedUserMessage.message + " Success! Location Deleted."})})
-//                 .catch(error => res.status(400).send(error))
-//         })
-//         .catch(error => res.status(400).send(error));
-// }
+
 
 module.exports = {
     create,
     update,
     getLocations,
-    //list,
+    list,
     destroy,
     retrieve
 };

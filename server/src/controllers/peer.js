@@ -90,42 +90,42 @@ const list = async(req, res) => {
 
 
 // retrieve info of specified peer
-function retrieve(req, res){
-    const peerId = parseInt(req.params.userId);
-    getGivenUserInfoAll(peerId, "Peers")
-        .then(peer => {
-            if(!peer){
-                return res.status(201).send({message: 'User Not Found'});
-            }
+// function retrieve(req, res){
+//     const peerId = parseInt(req.params.userId);
+//     getGivenUserInfoAll(peerId, "Peers")
+//         .then(peer => {
+//             if(!peer){
+//                 return res.status(201).send({message: 'User Not Found'});
+//             }
 
-            //check that user is an Peer
-            if(peer.user_type !== PEER_TYPE){
-                return res.status(201).send({message: "No Peer with given ID exists."})
-            }
+//             //check that user is a Peer
+//             if(peer.user_type !== PEER_TYPE){
+//                 return res.status(201).send({message: "No Peer with given ID exists."})
+//             }
 
-            return res.status(200).send(peer);
-        })
-        .catch(error => res.status(400).send(error));
-}
+//             return res.status(200).send(peer);
+//         })
+//         .catch(error => res.status(400).send(error));
+// }
 
 // update user info for specified user
-function getAllUpdatedInfo(user, req){
-    const currentUserId = user.userId;
-    return updateGivenUserEmail(user, req)
-        .then(result => {
-            console.log(result.message);
+// function getAllUpdatedInfo(user, req){
+//     const currentUserId = user.userId;
+//     return updateGivenUserEmail(user, req)
+//         .then(result => {
+//             console.log(result.message);
 
-            // return the joined full info of updated peer
-            return usersInnerJoin("Peers")
-                .then(users => {
-                    const specifiedUser = users.filter(user => {
-                        return user.id === currentUserId;
-                    });
-                    return specifiedUser[0];
-                });
-        })
-        .catch(error => error);
-}
+//             // return the joined full info of updated peer
+//             return usersInnerJoin("Peers")
+//                 .then(users => {
+//                     const specifiedUser = users.filter(user => {
+//                         return user.id === currentUserId;
+//                     });
+//                     return specifiedUser[0];
+//                 });
+//         })
+//         .catch(error => error);
+// }
 const update = async(req, res) =>{
     console.log("peer --- ", peer);
     const user = await users.findOne({where:{id:req.params.userId}});
@@ -183,37 +183,7 @@ const update = async(req, res) =>{
                 return res.status(400).send(error)
             });
 }
-// // update specified peer info (allows updates in users table too)
-// function update(req, res){
-//     return Peer
-//         .findOne({
-//             where: getUserId(req)
-//         })
-//         .then(peer => {
-//             if(!peer){
-//                 return new Error('Peer Not Found');
-//             }
 
-//             // update Peers table entries, then update users table entries
-//             // get and send the updated info from both Peers and users table 
-//             return peer
-//                 .update(req.body, {
-//                     fields: Object.keys(req.body)                 
-//                 })
-//                 .then(updatedPeer => {
-//                     const updatedPeerInfo = updatedPeer.dataValues;
-//                     return getAllUpdatedInfo(updatedPeerInfo, req);
-//                 })
-//                 .catch(error => error);
-//         })
-//         .then(updatedPeer => {
-//             if(updatedPeer instanceof Error){
-//                 return res.status(400).send({message: updatedPeer.message});
-//             }
-//             return res.status(200).send(updatedPeer);
-//         })
-//         .catch(error => res.status(400).send(error));
-// }
 const destroy = async(req, res) =>{
     console.log("peer --- ", peer);
     const user = await users.findOne({where:{id:req.params.userId}});
@@ -245,27 +215,6 @@ const destroy = async(req, res) =>{
     }
    
 }
-// // delete specified peer from Peers and users tables
-// function destroy(req,res){
-//     const currentUserId = req.params.userId;
-//     return Peer
-//         .findOne({ where: getUserId(req) })
-//         .then(peer => {
-//             if(!peer){
-//                 return res.status(201).send({ message: 'Peer Not Found' });
-//             }
-
-//             return peer
-//                 .destroy()
-//                 .then(() => {
-//                     // delete peer from users table
-//                     return deleteGivenUser(currentUserId)
-//                 })
-//                 .then(deletedUserMessage => {res.status(200).send({message: deletedUserMessage.message + " Success! Peer Deleted."})})
-//                 .catch(error => res.status(400).send(error))
-//         })
-//         .catch(error => res.status(400).send(error));
-// }
 
 module.exports = {
     create,
