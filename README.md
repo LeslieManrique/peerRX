@@ -19,11 +19,9 @@ EMAIL_USER_RECEIVER=
 GOOGLE_REFRESH_TOKEN=
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
-
 ```
 
-
-#PeerRX API
+# PeerRX API
 ## /login
 #### Type: Post
 #### Description: logs in a user and returns jwt 
@@ -48,10 +46,10 @@ res.json({success: true, token: 'JWT ' + token});
 ```
 
 
-##/admin/listUsers
-####Type: get
-####Descriptions: lists users in the users table 
-####Restrictions: must be a registered admin 
+## /admin/listUsers
+#### Type: get
+#### Descriptions: lists users in the users table 
+#### Restrictions: must be a registered admin 
 
 ## /admin/approve/:id
 #### Type: post
@@ -62,17 +60,17 @@ res.json({success: true, token: 'JWT ' + token});
 id: id of user to approve 
 ```
 
-##/agency/add
-####Type: post
-####Description: Registers a new agency user 
-####Restrictions: None 
-####Body parameters - all users
+## /agency/add
+#### Type: post
+#### Description: Registers a new agency user 
+#### Restrictions: None 
+#### Body parameters - all users
 ```
 email_address 
 password
 user_type - {1 : 'agency', 2 : 'location'} 
 ```
-####Body parameters - agency specific
+#### Body parameters - agency specific
 ```
 name
 phone_number
@@ -89,7 +87,7 @@ main_contact_email_address
 
 ```
 
-##/profile/agency/:userId
+## /profile/agency/:userId
 #### Description: Gets information about a user (must be of type agency) 
 #### Restrictions: User must be logged in and userId must be there own or user must be a registered, approved, admin. 
 #### URL Parameters
@@ -97,7 +95,7 @@ main_contact_email_address
 userId
 ```
 
-##/agency/public/list 
+## /agency/public/list 
 #### Description can list of agencies and filter by optional query parameters. 
 #### Restrictions: None 
 #### Query parameters
@@ -106,7 +104,7 @@ state
 zipcode
 ```
 
-##/agency/delete/:userId
+## /agency/delete/:userId
 #### Description: delete an agency
 #### Restrictions: registered, approved admin
 #### URL parameters
@@ -114,17 +112,17 @@ zipcode
 userId - userId to delete 
 ```
 
-##/location/add
-####Type: post
-####Description: Registers a new location user 
-####Restrictions: None 
-####Body parameters - all users
+## /location/add
+#### Type: post
+#### Description: Registers a new location user 
+#### Restrictions: None 
+#### Body parameters - all users
 ```
 email_address 
 password
 user_type - {1 : 'agency', 2 : 'location'} 
 ```
-####Body parameters - location specific
+#### Body parameters - location specific
 ```
 name
 phone_number
@@ -143,7 +141,7 @@ location_type
 
 ```
 
-##/profile/location/:userId
+## /profile/location/:userId
 #### Description: Gets information about a user (must be of type location) 
 #### Restrictions: User must be logged in and userId must be there own or user must be a registered, approved, admin. 
 #### URL Parameters
@@ -151,7 +149,7 @@ location_type
 userId
 ```
 
-##/locations/public/list 
+## /locations/public/list 
 #### Description can  get list of locations and filter by optional query parameters. 
 #### Restrictions: None 
 #### Query parameters
@@ -160,7 +158,7 @@ state
 zipcode
 ```
 
-##/locations/delete/:userId
+## /locations/delete/:userId
 #### Description: delete an agency
 #### Restrictions: registered, approved admin
 #### URL parameters
@@ -168,13 +166,13 @@ zipcode
 userId - userId to delete 
 ```
 
-##/peer/add/:userId
-####Type: Post
-####Description: create a peer that is associated with current authenticated agency
-####Restrictions, authenticated agency, location, admin who can access the param 
-####URL Parameters
+## /peer/add/:userId
+#### Type: Post
+#### Description: create a peer that is associated with current authenticated agency
+#### Restrictions, authenticated agency, location, admin who can access the param 
+#### URL Parameters
 ```userId```
-####Body Parameters
+#### Body Parameters
 ```
 req.body.first_name
 req.body.last_name
@@ -200,21 +198,21 @@ req.body.supervisor_name
 req.body.supervisor_phone_number,
 ```
 
-##/peer/list/:userId
-####Type: get
-####Description: list peers that are associated wit h `userId`
-####Restrictions, authenticated agency, location, admin who can access the param 
-####URL Parameters
+## /peer/list/:userId
+#### Type: get
+#### Description: list peers that are associated wit h `userId`
+#### Restrictions, authenticated agency, location, admin who can access the param 
+#### URL Parameters
 ```userId```
 
-##/peer/update/:userId/:peerId
-####Type: Put
-####Description: update peer information 
-####Url Parameters
+## /peer/update/:userId/:peerId
+#### Type: Put
+#### Description: update peer information 
+#### Url Parameters
 ```
 userId - user either a location or agency
 peerId - peer attached to user
-````
-##/peer/delete/:userId/:peerId
-####Description: delete peer 
+```
+## /peer/delete/:userId/:peerId
+#### Description: delete peer 
 
