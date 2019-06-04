@@ -78,7 +78,7 @@ function destroy(req, res){
     });
 }
 
-const approveUser = async (type, req, res) => {
+const approveUser = async (req, res) => {
   console.log("APPROVE FUNCTION");
   console.log(type, res, res);
   let user = null;
@@ -89,24 +89,7 @@ const approveUser = async (type, req, res) => {
       return res.status(400).send(error);
   }
 
-  let can_approve = false
-
-  if(type == "admin"){
-    can_approve = true
-  }
-  else if(type == "agency"){
-    if(user.user_type == 0 || user.user_type == 1){
-      can_approve = true
-    }
-    else{
-      can_approve = false
-    }
-  }
-  else{
-    can_approve = false
-  }
-
-  if (can_approve == true){
+  if (user){
     try{
       await users.update({approved:approveUserToggle(user)},{where:{id:parseInt(user.id)}});
       res.json({success:true, message: "User approval value changed"});

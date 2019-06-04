@@ -5,7 +5,7 @@ const {authenticateAdmin, authenticateAgency, isApproved, canAccessParam} = requ
 
 
 router
-    .post('/agency/add/:userId', authenticateAgency, agencyController.create)
+    .post('/agency/add/', agencyController.create)
     //.post('/add_agency/:userId', agencyController.create)
     // .get('/agency/all', [authenticateAdmin, isApproved], agencyController.list)
 
@@ -15,10 +15,10 @@ router
     .put('/agency/update/:userId',[authenticateAgency], agencyController.update)
 
     //.post('/update_agency/:userId', agencyController.update)
-    .post('/agency/delete/userId', [authenticateAdmin, isApproved], agencyController.destroy)
-    .post('/admin/approve/:id', [authenticateAgency, isApproved], function(req, res, next){
-        usersController.approveUser("agency", req, res);
-    })
+    .post('/agency/delete/:userId', [authenticateAdmin, isApproved], agencyController.destroy)
+    // .post('/admin/approve/:id', [authenticateAdmin, isApproved], function(req, res, next){
+    //     usersController.approveUser("agency", req, res);
+    // })
     
     //.delete('/delete_agency/:userId', agencyController.destroy);
     //TODO: An agency can approve a peer

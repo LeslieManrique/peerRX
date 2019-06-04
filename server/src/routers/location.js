@@ -7,12 +7,14 @@ router
     //submitting a profile only needs to make sure that theh right user is authorizing
     .post('/location/add/', locationController.create)
     // only current user and admin can access this route 
-    // .get('/profile/location/:userId', [authenticateLocation, canAccessParam], locationController.retrieve)
+    .get('/profile/location/:userId', [authenticateLocation, canAccessParam], locationController.retrieve)
     .get('/location/public/list', locationController.getLocations)
     //only admin can access this route
     // .get('/location/all', [authenticateAdmin, isApproved], locationController.list) 
     .put('/location/update/:userId', [authenticateLocation], locationController.update)
     //submit a locations profile
-    .delete('location/delete/:userId', [authenticateAdmin, isApproved], locationController.destroy);
+    .delete('location/delete/:userId', [authenticateAdmin, isApproved], locationController.destroy)
+    .post('/location/:locationId/addAgency/:agencyId', [authenticateLocation], locationController.addAgency)
 
+    
 module.exports = router;

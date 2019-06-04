@@ -1,5 +1,6 @@
-const location = require('../models').locations;
 const users = require('../models').users;
+const location = require('../models').locations;
+const location_agency = require('../models').location_preferred_agencies;
 const {getCoordinatePoint} = require('../helpers/geocode');
 const {getUserId, usersLeftJoin, usersInnerJoin, getGivenUserInfoAll,
         getGivenUserInfo, deleteGivenUser, updateGivenUserEmail, isAddressChanged, getUserProfile, registerUser, getUserTypeFromName, getDataByParam} = require('../helpers/queryFunctions');
@@ -94,6 +95,7 @@ function list(req, res){
         .catch(error => res.status(400).send(error));
 }
 
+
 // retrieve info of specified location
 function retrieve(req, res){
     const locationId = parseInt(req.params.userId);
@@ -137,6 +139,40 @@ const getLocations = async(req, res) =>{
         console.log(error);
         return res.status(400).send(error);
     }
+
+}
+
+const addAgency = async(req, res) =>{
+    console.log("add agency");
+    console.log(req.params);
+    let user = null;
+    try{
+        user = await users.findOne({where:{id:parseInt(req.params.agencyId)}});
+
+    }
+    catch(error){
+        console.log(error);
+        return res.status(400).send(error)
+    }
+
+
+    if(user){
+        location_agency.create({
+            location_id : parseInt(req.params.locationId),
+            agency_id: parseInt(req.params.agencyId)
+        })
+        .then(result =>{
+            return res.status(200).send("Successfully added preffered agency");
+        })
+        .catch(error=>{
+            console.log(error);
+            return res.status(400).send(error);
+        })
+    }
+    else{
+        return res.status(400).send("No agency with that id")
+    }
+   
 
 }
 // update user info for specified user
@@ -208,5 +244,6 @@ module.exports = {
     getLocations,
     list,
     destroy,
-    retrieve
+    retrieve,
+    addAgency
 };

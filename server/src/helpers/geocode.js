@@ -25,8 +25,6 @@ function getCoordinatePoint(address1, address2, city, state, zipcode){
     return "LAT, LNG"
 }
 
-getCoordinatePoint("1834 browning st","" ,"baldwin", "ny","11510");
-
 module.exports = {
     getCoordinatePoint
 };
