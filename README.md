@@ -216,3 +216,67 @@ peerId - peer attached to user
 ## /peer/delete/:userId/:peerId
 #### Description: delete peer 
 
+# Broadcast Tables
+#### location_requests
+#### Description: 
+Table for logging location requests.  
+Locations are able to request for peers to be sent to provide patient care.  
+Each request gets its on unique identifier (`id`). 
+Preference are set by the location that sent out the request. 
+
+`times_requested` is the number of times requests gets broadcasted  
+`expired_at` is the time set for request to expire   
+`note` any information a peer might need to know regarding the request  
+`completed` boolean indicating a request has been fulfilled 
+
+```
+CREATE TABLE `location_requests`(
+	`id` BIGINT NOT NULL AUTO_INCREMENT,
+	`location_id` BIGINT NOT NULL, 
+	`request_type` BIGINT NOT NULL,
+	`gender_preference` varchar(100),
+	`language_preference` varchar(100),
+	`case` varchar(100),
+	`age_range` varchar(100),
+	`updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+  	`created_at` TIMESTAMP NOT NULL,
+  	`note` VARCHAR(255) DEFAULT '',
+  	`times_requested` INT NOT NULL DEFAULT 0,
+ 	`expired_at` TIMESTAMP DEFAULT NULL,
+ 	`completed` TINYINT DEFAULT 0,
+  	PRIMARY KEY(id),
+  	FOREIGN KEY(`location_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+)AUTO_INCREMENT=7000000;
+```
+
+#### peers_accepted
+#### Description: 
+While the request is not expired, meaning it hasnt hit a set expiration time, all peers that accept the request will be recorded in this table. 
+```
+
+CREATE TABLE `peers_accepted`(
+	`request_id` BIGINT NOT NULL,
+	`peer_id` BIGINT NOT NULL,
+	`updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+  	`accepted_at` TIMESTAMP NOT NULL,
+  	 FOREIGN KEY(`request_id`) REFERENCES `location_requests`(`id`) ON DELETE CASCADE,
+  	 FOREIGN KEY(`peer_id`) REFERENCES `peers`(`peer_id`) ON DELETE CASCADE
+);
+
+```
+
+#### peers_deployed
+#### Description: 
+A background process will be be executed every minute (or maybe 5) for each request as indicated in the `location_request` table. This process will look for any incomplete requests (where completed column is set to 0) and if the expiration time is hit, it will run an algorithm (matching logic) that chooses the best peer for the request (using a ranking system). 
+Once a peer is chosen for the request, this table will be filled accordanly with the id of the request, id of the peer that was chosen and the time of approval. 
+
+```
+CREATE TABLE `peer_deployed`(
+	`request_id` BIGINT NOT NULL,
+	`peer_id` BIGINT NOT NULL,
+	`approved_at` TIMESTAMP NOT NULL,
+	FOREIGN KEY(`request_id`) REFERENCES `location_requests`(`id`) ON DELETE CASCADE,
+	FOREIGN KEY(`peer_id`) REFERENCES `peers`(`peer_id`) ON DELETE CASCADE
+
+);
+```
