@@ -54,6 +54,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
+    open_hour:{
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    closing_hour:{
+      type: DataTypes.STRING,
+      allowNull: false
+    },
 
   }, {
     timestamps: false
