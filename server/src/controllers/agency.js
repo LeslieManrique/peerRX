@@ -52,7 +52,9 @@ const create = async(req, res)=>{
                                 main_contact_first_name: req.body.main_contact_first_name,
                                 main_contact_last_name: req.body.main_contact_last_name,
                                 main_contact_phone_number: req.body.main_contact_phone_number,
-                                main_contact_email_address: req.body.main_contact_email_address
+                                main_contact_email_address: req.body.main_contact_email_address,
+                                open_hour:req.body.open_hour,
+                                closing_hour:req.body.closing_hour
                             })
                             .then(agency => res.status(201).send(agency))
                             .catch(error => {

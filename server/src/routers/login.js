@@ -28,7 +28,7 @@ router
             console.log("TOKEN BODY\t", body)
             const token = jwt.sign({data: {user : body}}, secret, { expiresIn: "10d"});
             
-            res.json({success: true, token: 'JWT ' + token});
+            res.json({success: true, token: 'JWT ' + token, user: body});
         }
     });
 
