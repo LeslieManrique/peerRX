@@ -5,6 +5,9 @@ const {getCoordinatePoint} = require('../helpers/geocode');
 const {getUserId, usersLeftJoin, usersInnerJoin, getGivenUserInfoAll,
         getGivenUserInfo, deleteGivenUser, updateGivenUserEmail, isAddressChanged, getUserProfile, registerUser, getUserTypeFromName, getDataByParam, getLocationsQuery} = require('../helpers/queryFunctions');
 
+
+const locationQueries = require('../queries/locationQueries')
+
 // user type 2 is a location -- replace this with query 
 // const LOCATION_TYPE = 2;
 // const LOCATION_TYPE_NAME = 'Location'
@@ -260,6 +263,17 @@ function destroy(req, res){
       });
   }
 
+
+  const requestsMadeByLocation  = (req, res, next) => {
+    locationQueries.requestsMade()
+    .then(response=> {
+        // do some modification to the response or call another query
+        res.send(response)
+    })
+    .catch(err => {
+        next(err)
+    })
+  }
 
 
 module.exports = {
