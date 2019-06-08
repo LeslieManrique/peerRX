@@ -15,6 +15,7 @@ router
     //submit a locations profile
     .delete('location/delete/:userId', [authenticateAdmin, isApproved], locationController.destroy)
     .post('/location/:locationId/addAgency/:agencyId', [authenticateLocation], locationController.addAgency)
+    .get('/location/public/locations', locationController.getLocationsForAdmin)
 
     
 module.exports = router;

@@ -2,7 +2,7 @@ const agency = require('../models').agencies;
 const users = require('../models').users;
 const {getCoordinatePoint} = require('../helpers/geocode');
 const {getGivenUserInfoAll, getUserId, usersLeftJoin, getGivenUserInfo, 
-        usersInnerJoin, deleteGivenUser, updateGivenUserEmail, isAddressChanged, getUserTypeFromName, getUserProfile, getDataByParam, registerUser } = require('../helpers/queryFunctions');
+        usersInnerJoin, deleteGivenUser, updateGivenUserEmail, isAddressChanged, getUserTypeFromName, getUserProfile, getDataByParam, registerUser, getAgenciesQuery } = require('../helpers/queryFunctions');
 // constant, user type 1 is agency
 const get_type = async() => { AGENCY_TYPE =  await getUserTypeFromName('agency')};
 const agency_name = 'agency'
@@ -142,6 +142,30 @@ const getAgencies = async(req, res) =>{
 
 }
 
+const getAgenciesForAdmin = async(req, res) =>{
+    console.log("Getting agencies");
+    const table = 'agencies';
+    const obj = {}
+    console.log(req);
+    if(req.query.state){
+        console.log("1");
+        obj.state = req.query.state;
+    }
+    if(req.query.zipcode){
+        console.log("2");
+        obj.zipcode = req.query.zipcode;
+    }
+    try{
+        const data = await getAgenciesQuery(obj, table);
+        return res.status(200).send(data)
+    }
+    catch(error){
+        console.log(error);
+        return res.status(400).send(error);
+    }
+
+}
+
 // // update user info for specified user and return all of users info
 // function getAllUpdatedInfo(user, req){
 //     const currentUserId = user.userId;
@@ -211,5 +235,6 @@ module.exports = {
     list,
     destroy,
     retrieve,
-    getAgencies
+    getAgencies,
+    getAgenciesForAdmin
 };

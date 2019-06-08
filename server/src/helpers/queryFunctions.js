@@ -109,6 +109,57 @@ const getDataByParam = async(obj, table) => {
 
 
 }
+
+
+//agencies list 
+const getAgenciesQuery = async(obj, table) => {
+    console.log("FUNCTION GETDATABYPARAM");
+    console.log('obj -- ', obj);
+    console.log('table --',table);
+    const cols = '`name`, `phone_number`, `address1`, `address2`, `city`, `state`, `zipcode`';
+    let getQuery = 'SELECT users.id, agencies.name, users.email_address, agencies.address1, agencies.phone_number, users.approved FROM agencies INNER JOIN users ON agencies.agency_id = users.id;'
+    
+    console.log(getQuery);
+    
+    return sequelize
+        .query(getQuery, {
+            type: sequelize.QueryTypes.SELECT
+        })
+        .then(res => {
+            if(!res){
+                return new Error("No data retrieved.");
+            }
+            return res; 
+        })
+        .catch(error => console.log("error--",error));
+
+
+}
+
+const getLocationsQuery = async(obj, table) => {
+    console.log("FUNCTION GETDATABYPARAM");
+    console.log('obj -- ', obj);
+    console.log('table --',table);
+    const cols = '`name`, `phone_number`, `address1`, `address2`, `city`, `state`, `zipcode`';
+    let getQuery = 'SELECT  users.id, locations.name, users.email_address, locations.address1, locations.phone_number, users.approved FROM locations INNER JOIN users ON locations.location_id = users.id;'
+    
+    console.log(getQuery);
+    
+    return sequelize
+        .query(getQuery, {
+            type: sequelize.QueryTypes.SELECT
+        })
+        .then(res => {
+            if(!res){
+                return new Error("No data retrieved.");
+            }
+            return res; 
+        })
+        .catch(error => console.log("error--",error));
+}
+
+
+
 function findUserType(currentUserId){
     const selectByUserIdQuery = `SELECT ${VIEWABLE_USER_COLS} FROM users WHERE id=:userId;`;
     return sequelize
@@ -334,5 +385,7 @@ module.exports = {
     getUserTypeName,
     getUserTypeFromName,
     getDataByParam,
-    registerUser
+    registerUser,
+    getAgenciesQuery,
+    getLocationsQuery
 };

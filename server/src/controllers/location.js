@@ -3,7 +3,7 @@ const location = require('../models').locations;
 const location_agency = require('../models').location_preferred_agencies;
 const {getCoordinatePoint} = require('../helpers/geocode');
 const {getUserId, usersLeftJoin, usersInnerJoin, getGivenUserInfoAll,
-        getGivenUserInfo, deleteGivenUser, updateGivenUserEmail, isAddressChanged, getUserProfile, registerUser, getUserTypeFromName, getDataByParam} = require('../helpers/queryFunctions');
+        getGivenUserInfo, deleteGivenUser, updateGivenUserEmail, isAddressChanged, getUserProfile, registerUser, getUserTypeFromName, getDataByParam, getLocationsQuery} = require('../helpers/queryFunctions');
 
 // user type 2 is a location -- replace this with query 
 // const LOCATION_TYPE = 2;
@@ -142,6 +142,30 @@ const getLocations = async(req, res) =>{
 
 }
 
+const getLocationsForAdmin = async(req, res) =>{
+    console.log("Getting locations");
+    const table = 'locations';
+    const obj = {}
+    console.log(req);
+    if(req.query.state){
+        console.log("1");
+        obj.state = req.query.state;
+    }
+    if(req.query.zipcode){
+        console.log("2");
+        obj.zipcode = req.query.zipcode;
+    }
+    try{
+        const data = await getLocationsQuery(obj, table);
+        return res.status(200).send(data)
+    }
+    catch(error){
+        console.log(error);
+        return res.status(400).send(error);
+    }
+
+}
+
 const addAgency = async(req, res) =>{
     console.log("add agency");
     console.log(req.params);
@@ -245,5 +269,6 @@ module.exports = {
     list,
     destroy,
     retrieve,
-    addAgency
+    addAgency,
+    getLocationsForAdmin
 };
