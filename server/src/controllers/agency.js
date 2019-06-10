@@ -1,33 +1,46 @@
-const Agency = require('../models').Agency;
+const agency = require('../models').agencies;
+const users = require('../models').users;
 const {getCoordinatePoint} = require('../helpers/geocode');
 const {getGivenUserInfoAll, getUserId, usersLeftJoin, getGivenUserInfo, 
-        usersInnerJoin, deleteGivenUser, updateGivenUserEmail, isAddressChanged} = require('../helpers/queryFunctions');
+        usersInnerJoin, deleteGivenUser, updateGivenUserEmail, isAddressChanged, getUserTypeFromName, getUserProfile, getDataByParam, registerUser, getAgenciesQuery } = require('../helpers/queryFunctions');
 // constant, user type 1 is agency
-const AGENCY_TYPE = 1;
+const get_type = async() => { AGENCY_TYPE =  await getUserTypeFromName('agency')};
+const agency_name = 'agency'
 
 // add new agency
-function create(req, res){
-    return Agency
-        .findOne({where: getUserId(req)})
+const create = async(req, res)=>{
+    let registration_id = '';
+    try{
+        registration_id = await registerUser(req, res);
+    }
+    catch(error){
+        console.log(error);
+        return res.status(400).send(error);
+    }
+    if(registration_id == null){
+        return res.status(400).send("user could not be registered");
+    }
+    const AGENCY_TYPE = await getUserTypeFromName(agency_name);
+    return agency
+        .findOne({where: {agency_id: registration_id}})
         .then(users => {
             // check that it is not already in Agency table
             if(users){
-                console.log(users.dataValues);
                 return res.status(400).send({message: "Agency already exists."});
             }
-
             // check that userId exists in users table
-            getGivenUserInfo(req.params.userId)
+            getGivenUserInfo(registration_id)
                 .then(user => {
                     if(user){
-                        if(user.user_type !== AGENCY_TYPE){
+                        if(parseInt(user.user_type) !== AGENCY_TYPE){
                             return res.status(201).send({message: "User not an Agency"});
                         }
 
-                        return Agency
+                        return agency
                             .create({
                                 name: req.body.name,
                                 phone_number: req.body.phone_number,
+                                country: req.body.country,
                                 address1: req.body.address1,
                                 address2: req.body.address2,
                                 city: req.body.city,
@@ -35,22 +48,42 @@ function create(req, res){
                                 zipcode: req.body.zipcode,
                                 coordinate_point: getCoordinatePoint(req.body.address1, req.body.address2, 
                                                     req.body.city, req.body.state, req.body.zipcode),
-                                userId: req.params.userId
+                                agency_id: parseInt(registration_id),
+                                main_contact_first_name: req.body.main_contact_first_name,
+                                main_contact_last_name: req.body.main_contact_last_name,
+                                main_contact_phone_number: req.body.main_contact_phone_number,
+                                main_contact_email_address: req.body.main_contact_email_address,
+                                open_hour:req.body.open_hour,
+                                closing_hour:req.body.closing_hour
                             })
                             .then(agency => res.status(201).send(agency))
-                            .catch(error => res.status(400).send(error));
+                            .catch(error => {
+                                users.destroy({where:{id:registration_id}});
+
+                                console.log(error);
+                                res.status(400).send(error)
+                            });
                     }
                     else{
+                        users.destroy({where:{id:registration_id}});
+
                         return res.status(201).send({message: "User Not Found"});
                     }
                 });
         })
-        .catch(error => res.status(400).send(error));
+        .catch(error => {
+            users.destroy({where:{id:registration_id}});
+            res.status(400).send(error)
+        });
 }
 
 // list agencies
-function list(req, res){
-    usersLeftJoin("Agencies")
+// todo - delete
+const list= async(req, res)=>{
+    AGENCY_TYPE = await getUserTypeFromName(agency_name);
+    console.log("AGENCY TYPE = ", AGENCY_TYPE);
+    console.log("list agencies");
+    usersLeftJoin("agencies")
         .then(users => {
             const agencies = users.filter(user => {
                 return user.user_type === AGENCY_TYPE;
@@ -60,15 +93,20 @@ function list(req, res){
         .catch(error => res.status(400).send(error));
 }
 
+
+
 // retrieve info of specified agency
-function retrieve(req, res){
+const retrieve = async(req, res) =>{
+    console.log("retrieving")
+    const AGENCY_TYPE = await getUserTypeFromName(agency_name);
+    console.log("AGENCY TYPE = ", AGENCY_TYPE);
     const agencyId = parseInt(req.params.userId);
-    getGivenUserInfoAll(agencyId, "Agencies")
+    getUserProfile(agencyId, "agencies")
         .then(agency => {
             if(!agency){
                 return res.status(404).send({message: 'User Not Found'});
             }
-
+            console.log("---\n", agency);
             //check that user is an Agency
             if(agency.user_type !== AGENCY_TYPE){
                 return res.status(400).send({message: "No Agency with given ID exists."})
@@ -79,61 +117,92 @@ function retrieve(req, res){
         .catch(error => res.status(400).send(error));
 }
 
-// update user info for specified user and return all of users info
-function getAllUpdatedInfo(user, req){
-    const currentUserId = user.userId;
-    return updateGivenUserEmail(user, req)
-        .then(result => {
-            console.log(result.message);
+// retrieve public agency data 
+const getAgencies = async(req, res) =>{
+    console.log("Getting agencies");
+    const table = 'agencies';
+    const obj = {}
+    console.log(req);
+    if(req.query.state){
+        console.log("1");
+        obj.state = req.query.state;
+    }
+    if(req.query.zipcode){
+        console.log("2");
+        obj.zipcode = req.query.zipcode;
+    }
+    try{
+        const data = await getDataByParam(obj, table);
+        return res.status(200).send(data)
+    }
+    catch(error){
+        console.log(error);
+        return res.status(400).send(error);
+    }
 
-            // return the joined full info of updated agency with user info
-            return usersInnerJoin("Agencies")
-                .then(users => {
-                    const specifiedUser = users.filter(user => {
-                        return user.id === currentUserId;
-                    });
-                    return specifiedUser[0];
-                });
-        })
-        .catch(error => error);
 }
+
+const getAgenciesForAdmin = async(req, res) =>{
+    console.log("Getting agencies");
+    const table = 'agencies';
+    const obj = {}
+    console.log(req);
+    if(req.query.state){
+        console.log("1");
+        obj.state = req.query.state;
+    }
+    if(req.query.zipcode){
+        console.log("2");
+        obj.zipcode = req.query.zipcode;
+    }
+    try{
+        const data = await getAgenciesQuery(obj, table);
+        return res.status(200).send(data)
+    }
+    catch(error){
+        console.log(error);
+        return res.status(400).send(error);
+    }
+
+}
+
+// // update user info for specified user and return all of users info
+// function getAllUpdatedInfo(user, req){
+//     const currentUserId = user.userId;
+//     return updateGivenUserEmail(user, req)
+//         .then(result => {
+//             console.log(result.message);
+
+//             // return the joined full info of updated agency with user info
+//             return usersInnerJoin("Agencies")
+//                 .then(users => {
+//                     const specifiedUser = users.filter(user => {
+//                         return user.id === currentUserId;
+//                     });
+//                     return specifiedUser[0];
+//                 });
+//         })
+//         .catch(error => error);
+// }
 
 // update specified agency info (allows updates in users table too)
 function update(req, res){
-    return Agency
-        .findOne({
-            where: getUserId(req)
-        })
+    return agency
+        .findOne({where: {agency_id: req.params.userId}})
         .then(agency => {
             if(!agency){
-                return new Error('Agency Not Found');
+                console.log("no agency found");
+                return res.status(400).send({ message: 'Agency Not Found' });
             }
-
-            // check if address changed
-            if(isAddressChanged(agency, req)){
-                // updated req.body with new coordinate_point
-                const newCoords = getCoordinatePoint(req.body.address1, req.body.address2, 
-                    req.body.city, req.body.state, req.body.zipcode);
-                req.body["coordinate_point"] = newCoords;
-            }
-
-            // update Agencies table entries, then update users table entries
-            // get and send the updated info from both Agencies and users table 
             return agency
                 .update(req.body, {
                     fields: Object.keys(req.body)                 
                 })
                 .then(updatedAgency => {
-                    const updatedAgencyInfo = updatedAgency.dataValues;
-                    return getAllUpdatedInfo(updatedAgencyInfo, req);
+                    console.log("successful")
+                    return res.status(200).send(updatedAgency);
                 })
                 .catch(error => error);
-        })
-        .then(updatedAgency => {
-            if(updatedAgency instanceof Error){
-                return res.status(400).send({message: updatedAgency.message});
-            }
-            return res.status(200).send(updatedAgency);
         })
         .catch(error => res.status(400).send(error));
 }
@@ -141,8 +210,8 @@ function update(req, res){
 // delete specified agency from Agencies and users tables
 function destroy(req,res){
     const currentUserId = req.params.userId;
-    return Agency
-        .findOne({ where: getUserId(req) })
+    return agency
+        .findOne({where: {agency_id: req.params.userId}})
         .then(agency => {
             if(!agency){
                 return res.status(404).send({ message: 'Agency Not Found' });
@@ -165,5 +234,7 @@ module.exports = {
     update,
     list,
     destroy,
-    retrieve
+    retrieve,
+    getAgencies,
+    getAgenciesForAdmin
 };

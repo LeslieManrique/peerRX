@@ -8,12 +8,12 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false, 
       unique: {msg: 'An account exists with this email. Please try to login'},
       validate: {
-      isEmail: {msg: 'Email is invalid'}
-  }},
+        isEmail: {msg: 'Email is invalid'}
+      }},
     password: {type: DataTypes.STRING, allowNull: false}, 
-    user_type: {type: DataTypes.STRING, allowNull: false}, 
+    user_type: {type: DataTypes.INTEGER, allowNull: false}, 
     approved: {type: DataTypes.BOOLEAN, defaultValue: 0} 
-  }, {});
+  }, {timestamps: false});
   users.associate = function(models) {
     // associations can be defined here
   };
@@ -31,9 +31,11 @@ module.exports = (sequelize, DataTypes) => {
     const user = this;
     //Hashes the password sent by the user for login and checks if the hashed password stored in the 
     //database matches the one sent. Returns true if it does else false.
-    const compare = bcrypt.compare(password, this.password).then((res)=>{return res;});
+    const compare = bcrypt.compare(password, this.password).then((res)=>{return res});
     return compare
   };
+  
+
 
   return users;
 

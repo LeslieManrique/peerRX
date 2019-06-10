@@ -1,9 +1,8 @@
 module.exports = {
     userRouter: require('./users'),
     locationRouter: require('./location'),
-    // agencyRouter: require('./agency'),
-    // peerRouter: require('./peer'),
-    // agenciesLocationsRouter: require('./agencieslocations'),
+    agencyRouter: require('./agency'),
+    peerRouter: require('./peer'),
     // agenciesPeersRouter: require('./agenciespeers'),
     // hoursListRouter: require('./hourslist'),
     // hourItemRouter: require('./houritem'),

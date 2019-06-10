@@ -1,4 +1,6 @@
 const sequelize = require('../models').sequelize;
+const user_types = require('../models').user_types;
+const users = require('../models').users;
 
 // choose only id, email_address, and user_type columns; don't send out passwords from db
 const VIEWABLE_USER_COLS = `users.id, users.email_address, users.user_type, users.approved`;
@@ -6,6 +8,158 @@ const VIEWABLE_USER_COLS_ALT = `users.email_address`;
 
 // find user by user ID then get their user type
 // search for user id from req.params.userId in users table and get user type number
+
+const registerUser = async(req, res)=>{
+    console.log("registerUser");
+    console.log(req.body);
+    const user_type_name = await getUserTypeName(req.body.user_type);
+    if(!req.body.email_address && !req.body.password && !req.body.user_type){
+        console.log('error 1');
+        return null;
+    }
+    if(!user_type_name){
+        console.log('error 2');
+      return null;
+    }
+    if(user_type_name == "admin"){
+        console.log('error 3');
+      return null;
+    }
+    return users
+      .create({
+        email_address: req.body.email_address,
+        password: req.body.password,
+        user_type: req.body.user_type
+      })
+      .then(user => {
+          console.log('user --', user);
+        return user.id;
+      })
+      .catch(error => {
+          console.log(error);
+        return null;
+      });
+  }
+const getUserTypeName = async(user_id) => {
+    let user_type = null;
+    try{
+        user_type = await user_types.findOne({where:{user_type : user_id}});
+    }
+    catch(error){
+        console.log("get user type from name");
+        console.log(error);
+    }
+
+    if(!user_type){
+    return; 
+    }
+    else{
+        return user_type.user_type_name;
+    }
+}
+
+const getUserTypeFromName = async(type_name) => {
+    const user_type_data = await user_types.findOne({where:{user_type_name:type_name}});
+    if(!user_type_data){
+        return;
+    }
+    else{
+        return user_type_data.user_type; 
+    }
+}
+
+//agencies list 
+const getDataByParam = async(obj, table) => {
+    console.log("FUNCTION GETDATABYPARAM");
+    console.log('obj -- ', obj);
+    console.log('table --',table);
+    const cols = '`name`, `phone_number`, `address1`, `address2`, `city`, `state`, `zipcode`';
+    let getQuery = ''
+    //cols - [state, zip]
+    if(obj.zipcode && obj.state){
+        getQuery = `SELECT ${cols} FROM ${table} WHERE state = '${obj.state}' AND zipcode = '${obj.zipcode}';`;
+        console.log(getQuery);
+    }
+    else if(obj.state){
+        getQuery = `SELECT ${cols} FROM ${table} WHERE state = '${obj.state}';`;
+        console.log(getQuery);
+    }
+    else if(obj.zipcode){
+        getQuery = `SELECT ${cols} FROM ${table} WHERE zipcode = '${obj.zipcode}';`;
+        console.log(getQuery);
+    }
+    else{
+        getQuery = `SELECT ${cols} FROM ${table};`;
+
+
+        console.log(getQuery);
+    }
+    
+    return sequelize
+        .query(getQuery, {
+            type: sequelize.QueryTypes.SELECT
+        })
+        .then(res => {
+            if(!res){
+                return new Error("No data retrieved.");
+            }
+            return res; 
+        })
+        .catch(error => console.log("error--",error));
+
+
+}
+
+
+//agencies list 
+const getAgenciesQuery = async(obj, table) => {
+    console.log("FUNCTION GETDATABYPARAM");
+    console.log('obj -- ', obj);
+    console.log('table --',table);
+    const cols = '`name`, `phone_number`, `address1`, `address2`, `city`, `state`, `zipcode`';
+    let getQuery = 'SELECT users.id, agencies.name, users.email_address, agencies.address1, agencies.phone_number, users.approved FROM agencies INNER JOIN users ON agencies.agency_id = users.id;'
+    
+    console.log(getQuery);
+    
+    return sequelize
+        .query(getQuery, {
+            type: sequelize.QueryTypes.SELECT
+        })
+        .then(res => {
+            if(!res){
+                return new Error("No data retrieved.");
+            }
+            return res; 
+        })
+        .catch(error => console.log("error--",error));
+
+
+}
+
+const getLocationsQuery = async(obj, table) => {
+    console.log("FUNCTION GETDATABYPARAM");
+    console.log('obj -- ', obj);
+    console.log('table --',table);
+    const cols = '`name`, `phone_number`, `address1`, `address2`, `city`, `state`, `zipcode`';
+    let getQuery = 'SELECT  users.id, locations.name, users.email_address, locations.address1, locations.phone_number, users.approved FROM locations INNER JOIN users ON locations.location_id = users.id;'
+    
+    console.log(getQuery);
+    
+    return sequelize
+        .query(getQuery, {
+            type: sequelize.QueryTypes.SELECT
+        })
+        .then(res => {
+            if(!res){
+                return new Error("No data retrieved.");
+            }
+            return res; 
+        })
+        .catch(error => console.log("error--",error));
+}
+
+
+
 function findUserType(currentUserId){
     const selectByUserIdQuery = `SELECT ${VIEWABLE_USER_COLS} FROM users WHERE id=:userId;`;
     return sequelize
@@ -26,7 +180,7 @@ function findUserType(currentUserId){
 //full table joins
 // full outer join given table with users table (only accepts Agencies, Peers, or Locations)
 function usersFullOuterJoin(tableName){
-    if(tableName !== "Agencies" && tableName !== "Peers" && tableName !== "Locations"){
+    if(tableName !== "agencies" && tableName !== "[eers" && tableName !== "locations"){
         return Promise.resolve(`Cannot join ${tableName} with users table.`);
     }
 
@@ -47,10 +201,10 @@ function usersFullOuterJoin(tableName){
 
 function getUserProfile(currentUserId, tableName){
     console.log("Hello")
-    if(tableName !== "Agencies" && tableName !== "Peers" && tableName !== "Locations"){
+    if(tableName !== "agencies" && tableName !== "peers" && tableName !== "locations"){
         return Promise.resolve(`Cannot join ${tableName} with users table.`);
     }
-    const query = `SELECT ${VIEWABLE_USER_COLS_ALT}, user_types.user_type_name, \ 
+    const query = `SELECT ${VIEWABLE_USER_COLS_ALT}, user_types.user_type_name, user_types.user_type, \ 
                    ${tableName}.* FROM users, ${tableName}, user_types WHERE users.id = ${currentUserId} and users.user_type = user_types.user_type;`;
     console.log("Query --", query)
     return sequelize
@@ -99,7 +253,8 @@ function usersInnerJoin(tableName){
 
 // left join given table with users table (only accepts Agencies, Peers, or Locations)
 function usersLeftJoin(tableName){
-    if(tableName !== "Agencies" && tableName !== "Peers" && tableName !== "Locations"){
+    console.log("users left join");
+    if(tableName !== "agencies" && tableName !== "locations"){
         return Promise.resolve(`Cannot join ${tableName} with users table.`);
     }
     const joinQuery = `SELECT ${VIEWABLE_USER_COLS}, ${tableName}.* FROM users LEFT JOIN ${tableName} ON users.id = ${tableName}.userId;`;
@@ -128,13 +283,14 @@ function usersRightJoin(tableName){
         });
 }
 
-// get user ID from params
+// get user ID from params (delete this)
 function getUserId(req){
     return {userId: parseInt(req.params.userId)};
 };
 
 // get specified user info from user table
 function getGivenUserInfo(currentUserId){
+    console.log("user query");
     const selectUserQuery = `SELECT ${VIEWABLE_USER_COLS} FROM users WHERE id=:userId LIMIT 1;`;
     return sequelize
         .query(selectUserQuery, {
@@ -149,6 +305,18 @@ function getGivenUserInfo(currentUserId){
         .catch(error => error);
 }
 
+function approveUserToggle(user){
+    console.log("approve user toggle.--------")
+    let approve_val = user.approved;
+    if(user.approved == false){
+      approve_val = true;
+    }
+    else{
+      approve_val = false;
+    }
+    return approve_val
+
+  };
 // delete user by id
 function deleteGivenUser(currentUserId){
     const deleteQuery = "DELETE FROM users WHERE id=:userId;";
@@ -212,5 +380,12 @@ module.exports = {
     usersLeftJoin,
     usersRightJoin,
     isAddressChanged,
-    getUserProfile
+    getUserProfile,
+    approveUserToggle,
+    getUserTypeName,
+    getUserTypeFromName,
+    getDataByParam,
+    registerUser,
+    getAgenciesQuery,
+    getLocationsQuery
 };

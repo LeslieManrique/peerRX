@@ -24,10 +24,11 @@ router
         }
         else{
             body = {id : user.id, email_address: user.email_address, user_type: user.user_type};
+
             console.log("TOKEN BODY\t", body)
             const token = jwt.sign({data: {user : body}}, secret, { expiresIn: "10d"});
             
-            res.json({success: true, token: 'JWT ' + token});
+            res.json({success: true, token: 'JWT ' + token, user: body});
         }
     });
 

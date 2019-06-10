@@ -1,15 +1,12 @@
 const express = require('express');
 const router = new express.Router();
 const peerController = require('../controllers').peers;
+const {authenticateAdmin, authenticatePeer, authenticateGeneral, isApproved, canAccessParam} = require('../services/auth');
 
 router
-    .get('/peer', (req, res) => res.status(200).send({
-            message: 'Welcome to the Peers API!'
-    }))
-    .post('/add_peer/:userId', peerController.create)
-    .get('/peers', peerController.list)
-    .get('/find_peer/:userId', peerController.retrieve)
-    .post('/update_peer/:userId', peerController.update)
-    .delete('/delete_peer/:userId', peerController.destroy);
+    .post('/peer/add/:userId', peerController.create)
+    .get('/peer/list/:userId', [authenticateGeneral, isApproved, canAccessParam], peerController.list)
+    .put('/peer/update/:userId/:peerId', [authenticateGeneral, isApproved, canAccessParam], peerController.update)
+    .delete('/peer/delete/:userId/:peerId', [authenticateGeneral, isApproved, canAccessParam], peerController.destroy);
 
 module.exports = router;
