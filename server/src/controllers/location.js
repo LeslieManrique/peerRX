@@ -265,10 +265,60 @@ function destroy(req, res){
 
 
   const requestsMadeByLocation  = (req, res, next) => {
-    locationQueries.requestsMade()
+    locationQueries.requestsList(req.query.locationId)
     .then(response=> {
         // do some modification to the response or call another query
-        res.send(response)
+        console.log(response)
+        const myListRequest=[]
+        
+        response.map(request=>{
+            var time = new Date(request.created_at)
+            var am_pm = (time.getHours() < 12) ? "am" : "pm";
+            var hour = (time.getHours() < 12) ? time.getHours() : time.getHours() - 12;
+            var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+
+            myListRequest.push(
+                {   
+                    id:request.id,
+                    date:time.toLocaleDateString("en-US", options),
+                    time:hour+':'+time.getMinutes()+':'+time.getSeconds()+' '+am_pm,
+                    peerType: request.specialty,
+                    agencyName:request.name,
+                    peerName:request.first_name+' '+request.last_name
+
+                }
+            )
+        })
+        res.send(myListRequest)
+    })
+    .catch(err => {
+        next(err)
+    })
+  }
+
+  const requestLocation  = (req, res, next) => {
+
+  
+    const requestBody = {   
+                            location_id : req.body.location_id,
+                            request_type : req.body.request_type,
+                            gender_preference : req.body.gender_preference,
+                            language_preference : req.body.language_preference,
+                            case : req.body.case,
+                            age_range : req.body.age_range,
+                            note : null,
+                            times_requested : 0,
+                            expired_at : null,
+                            completed : null,
+                            peer_id : null,
+                            specialty : req.body.specialty
+                        }
+    
+
+    locationQueries.requestsMade(requestBody)
+    .then(response=> {
+        // do some modification to the response or call another query
+        res.sendStatus(200).send(response)
     })
     .catch(err => {
         next(err)
@@ -284,5 +334,7 @@ module.exports = {
     destroy,
     retrieve,
     addAgency,
-    getLocationsForAdmin
+    getLocationsForAdmin,
+    requestsMadeByLocation,
+    requestLocation
 };
