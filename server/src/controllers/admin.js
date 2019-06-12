@@ -100,7 +100,7 @@ const getRequestReportForAdmin = async(req, res, next) =>{
                     gender: request.gender_preference,
                     language: request.language_preference,
                     age: request.age_range,
-                    status: request.completed,
+                    status: request.status,
                     agency: request.agency_name,
                     peerName:request.first_name+' '+request.last_name
 
