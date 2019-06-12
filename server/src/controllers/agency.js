@@ -2,7 +2,8 @@ const agency = require('../models').agencies;
 const users = require('../models').users;
 const {getCoordinatePoint} = require('../helpers/geocode');
 const {getGivenUserInfoAll, getUserId, usersLeftJoin, getGivenUserInfo, 
-        usersInnerJoin, deleteGivenUser, updateGivenUserEmail, isAddressChanged, getUserTypeFromName, getUserProfile, getDataByParam, registerUser, getAgenciesQuery } = require('../helpers/queryFunctions');
+        usersInnerJoin, deleteGivenUser, updateGivenUserEmail, isAddressChanged, getUserTypeFromName, getUserProfile, getDataByParam, registerUser } = require('../helpers/queryFunctions');
+const adminQueries = require('../queries/adminQueries')
 // constant, user type 1 is agency
 const get_type = async() => { AGENCY_TYPE =  await getUserTypeFromName('agency')};
 const agency_name = 'agency'
@@ -156,7 +157,7 @@ const getAgenciesForAdmin = async(req, res) =>{
         obj.zipcode = req.query.zipcode;
     }
     try{
-        const data = await getAgenciesQuery(obj, table);
+        const data = await adminQueries.getAgenciesQuery(obj, table);
         return res.status(200).send(data)
     }
     catch(error){
