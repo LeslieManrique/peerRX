@@ -3,10 +3,11 @@ const location = require('../models').locations;
 const location_agency = require('../models').location_preferred_agencies;
 const {getCoordinatePoint} = require('../helpers/geocode');
 const {getUserId, usersLeftJoin, usersInnerJoin, getGivenUserInfoAll,
-        getGivenUserInfo, deleteGivenUser, updateGivenUserEmail, isAddressChanged, getUserProfile, registerUser, getUserTypeFromName, getDataByParam, getLocationsQuery} = require('../helpers/queryFunctions');
+        getGivenUserInfo, deleteGivenUser, updateGivenUserEmail, isAddressChanged, getUserProfile, registerUser, getUserTypeFromName, getDataByParam} = require('../helpers/queryFunctions');
 
 
 const locationQueries = require('../queries/locationQueries')
+const adminQueries = require('../queries/adminQueries')
 
 // user type 2 is a location -- replace this with query 
 // const LOCATION_TYPE = 2;
@@ -159,7 +160,7 @@ const getLocationsForAdmin = async(req, res) =>{
         obj.zipcode = req.query.zipcode;
     }
     try{
-        const data = await getLocationsQuery(obj, table);
+        const data = await adminQueries.getLocationsQuery(obj, table);
         return res.status(200).send(data)
     }
     catch(error){
