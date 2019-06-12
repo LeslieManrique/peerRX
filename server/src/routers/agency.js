@@ -23,6 +23,8 @@ router
     //.delete('/delete_agency/:userId', agencyController.destroy);
     //TODO: An agency can approve a peer
     //.post('agency/approve_peer/:peerId', [authenticateAgency, isApproved], agencyController.approve)
-    .get('/agency/public/agencies', agencyController.getAgenciesForAdmin)    
+    .get('/agency/public/agencies', agencyController.getAgenciesForAdmin)
+    //GET ALL THE PEERS FROM THE AGENCY
+    .get('/agency/peers', agencyController.agencyPeers)
 
 module.exports = router;

@@ -25,14 +25,35 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
+    address1:{
+      type:DataTypes.STRING
+    },
+    /*address2:{
+      type:DataTypes.STRING
+    },*/
+    city:{
+      type:DataTypes.STRING
+    },
+    state:{
+      type:DataTypes.STRING
+    },
+    zipcode:{
+      type:DataTypes.STRING
+    },
     specialty: {
       type: DataTypes.STRING
     },
-    age_range_start:{
+    /*age_range_start:{
       type: DataTypes.INTEGER
     },
     age_range_end:{
       type: DataTypes.INTEGER
+    },*/
+    language: {
+      type: DataTypes.STRING
+    },
+    gender: {
+      type: DataTypes.STRING
     },
     certification: {
       type: DataTypes.STRING
@@ -46,39 +67,25 @@ module.exports = (sequelize, DataTypes) => {
     training_1: {
       type: DataTypes.STRING
     },
-    training_2: {
+    /*training_2: {
       type: DataTypes.STRING
     },
     training_3: {
       type: DataTypes.STRING
-    },
-    address1:{
-      type:DataTypes.STRING
-    },
-    address2:{
-      type:DataTypes.STRING
-    },
-    city:{
-      type:DataTypes.STRING
-    },
-    zipcode:{
-      type:DataTypes.STRING
-    },
-    state:{
-      type:DataTypes.STRING
-    },
+    },*/
+    
     supervisor_name:{
       type:DataTypes.STRING
     },
     supervisor_phone_number:{
       type:DataTypes.STRING
     },
-    user_id:{
-      type:DataTypes.STRING 
-    },
     coordinate_point:{
       type:DataTypes.STRING
     },
+    user_id:{
+      type:DataTypes.INTEGER 
+    }
   }, {timestamps: false});
 
   peer.associate = function(models) {
