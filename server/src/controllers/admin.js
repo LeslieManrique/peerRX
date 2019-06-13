@@ -91,6 +91,7 @@ const getRequestReportForAdmin = async(req, res, next) =>{
 
             requestList.push(
                 {   
+                    id: request.id,
                     date:time.toLocaleDateString("en-US", options),
                     time:hour+':'+time.getMinutes()+':'+time.getSeconds()+' '+am_pm,
                     locationName: request.location_name,

@@ -16,7 +16,7 @@ const adminRequestList = () =>{
 
 const adminRequestReport = () =>{
     console.log("admin request list for Dashboard")
-    const query = "SELECT lr.created_at, l.name as location_name, l.state, l.county, lr.specialty, lr.gender_preference, lr.language_preference, lr.age_range, lr.status, a.name as agency_name, p.first_name, p.last_name FROM location_requests as lr INNER JOIN peers as p ON lr.peer_id = p.peer_id INNER JOIN locations as l ON l.location_id = lr.location_id INNER JOIN agencies as a ON p.user_id = a.agency_id";
+    const query = "SELECT lr.id, lr.created_at, l.name as location_name, l.state, l.county, lr.specialty, lr.gender_preference, lr.language_preference, lr.age_range, lr.status, a.name as agency_name, p.first_name, p.last_name FROM location_requests as lr INNER JOIN peers as p ON lr.peer_id = p.peer_id INNER JOIN locations as l ON l.location_id = lr.location_id INNER JOIN agencies as a ON p.user_id = a.agency_id";
 
     return sequelize
         .query(query, {
