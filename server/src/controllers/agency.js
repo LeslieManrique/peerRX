@@ -8,6 +8,8 @@ const adminQueries = require('../queries/adminQueries')
 const get_type = async() => { AGENCY_TYPE =  await getUserTypeFromName('agency')};
 const agency_name = 'agency'
 
+const agencyQueries = require('../queries/agencyQueries')
+
 // add new agency
 const create = async(req, res)=>{
     let registration_id = '';
@@ -230,6 +232,18 @@ function destroy(req,res){
         .catch(error => res.status(400).send(error));
 }
 
+const agencyPeers  = (req, res, next) => {
+    agencyQueries.peerList(req.query.agencyId)
+    .then(response=> {
+        // do some modification to the response or call another query
+        console.log(response)
+        res.send(response)
+    })
+    .catch(err => {
+        next(err)
+    })
+  }
+
 module.exports = {
     create,
     update,
@@ -237,5 +251,6 @@ module.exports = {
     destroy,
     retrieve,
     getAgencies,
-    getAgenciesForAdmin
+    getAgenciesForAdmin,
+    agencyPeers
 };

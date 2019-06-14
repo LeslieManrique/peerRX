@@ -216,9 +216,50 @@ const destroy = async(req, res) =>{
    
 }
 
+const createPeer = async(req, res) =>{
+
+    return peer
+            .create({
+                first_name: req.body.first_name,
+                last_name: req.body.last_name,
+                email_address: req.body.email_address,
+                phone_number: req.body.phone_number,
+                address1: req.body.address1,
+                //address2: req.body.address2,
+                city: req.body.city,
+                state: req.body.state,
+                zipcode: req.body.zip,
+                specialty: req.body.specialty,
+                //age_range_start: req.body.age_range_start,
+                //age_range_end: req.body.age_range_end,
+                language: req.body.language,
+                gender: req.body.gender,
+                certification: req.body.certification,
+                certification_expiration_date: req.body.certification_expiration_date,
+                licensure: req.body.licensure,
+                training_1: req.body.training_1,
+                //training_2: req.body.training_2,
+                //training_3: req.body.training_3,
+                supervisor_name: req.body.supervisor_name,
+                supervisor_phone_number: req.body.supervisor_phone_number,
+                coordinate_point: 'LAT, LON',
+                user_id: parseInt(req.body.agency_id)
+          
+            })
+            .then(peer => {
+                console.log("success!", peer);
+                return res.status(200).send("New Peer Created");
+            })
+            .catch(error => {
+                console.log(error);
+                return res.status(400).send(error)
+            });
+}
+
 module.exports = {
     create,
     update,
     list,
-    destroy
+    destroy,
+    createPeer
 };
