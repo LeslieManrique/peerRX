@@ -16,7 +16,7 @@ const adminRequestList = () =>{
 
 const adminRequestReport = () =>{
     console.log("admin request list for Dashboard")
-    const query = "SELECT lr.created_at, l.name as location_name, l.state, l.county, lr.specialty, lr.gender_preference, lr.language_preference, lr.age_range, lr.completed, a.name as agency_name, p.first_name, p.last_name FROM location_requests as lr INNER JOIN peers as p ON lr.peer_id = p.peer_id INNER JOIN locations as l ON l.location_id = lr.location_id INNER JOIN agencies as a ON p.agency_id = a.agency_id";
+    const query = "SELECT lr.id, lr.created_at, l.name as location_name, l.state, l.county, lr.specialty, lr.gender_preference, lr.language_preference, lr.age_range, lr.status, a.name as agency_name, p.first_name, p.last_name FROM location_requests as lr INNER JOIN peers as p ON lr.peer_id = p.peer_id INNER JOIN locations as l ON l.location_id = lr.location_id INNER JOIN agencies as a ON p.user_id = a.agency_id";
 
     return sequelize
         .query(query, {
@@ -32,7 +32,7 @@ const getAgenciesQuery = async(obj, table) => {
     console.log('obj -- ', obj);
     console.log('table --',table);
     const cols = '`name`, `phone_number`, `address1`, `address2`, `city`, `state`, `zipcode`';
-    let getQuery = 'SELECT users.id, agencies.name, users.email_address, agencies.address1, agencies.phone_number, users.approved FROM agencies INNER JOIN users ON agencies.agency_id = users.id;'
+    let getQuery = 'SELECT users.id, agencies.name, users.email_address, agencies.address1, agencies.phone_number, users.approved FROM agencies INNER JOIN users ON agencies.user_id = users.id;'
     
     console.log(getQuery);
     
