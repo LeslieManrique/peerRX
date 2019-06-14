@@ -230,20 +230,25 @@ const createPeer = async(req, res) =>{
                 state: req.body.state,
                 zipcode: req.body.zip,
                 specialty: req.body.specialty,
-                //age_range_start: req.body.age_range_start,
-                //age_range_end: req.body.age_range_end,
+                age_range_start: req.body.age_range_start,
+                age_range_end: req.body.age_range_end,
                 language: req.body.language,
                 gender: req.body.gender,
                 certification: req.body.certification,
                 certification_expiration_date: req.body.certification_expiration_date,
                 licensure: req.body.licensure,
                 training_1: req.body.training_1,
+                available: req.body.available,
+                call_center: req.body.call_center,
+                on_site_location:req.body.on_site_location,
+                rank:req.body.rank,
                 //training_2: req.body.training_2,
                 //training_3: req.body.training_3,
                 supervisor_name: req.body.supervisor_name,
                 supervisor_phone_number: req.body.supervisor_phone_number,
                 coordinate_point: 'LAT, LON',
                 user_id: parseInt(req.body.agency_id)
+
           
             })
             .then(peer => {

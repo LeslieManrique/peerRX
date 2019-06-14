@@ -43,17 +43,20 @@ module.exports = (sequelize, DataTypes) => {
     specialty: {
       type: DataTypes.STRING
     },
-    /*age_range_start:{
+    age_range_start:{
       type: DataTypes.INTEGER
     },
     age_range_end:{
       type: DataTypes.INTEGER
-    },*/
+    },
     language: {
       type: DataTypes.STRING
     },
     gender: {
       type: DataTypes.STRING
+    },
+    rank: {
+      type: DataTypes.INTEGER
     },
     certification: {
       type: DataTypes.STRING
@@ -73,7 +76,15 @@ module.exports = (sequelize, DataTypes) => {
     training_3: {
       type: DataTypes.STRING
     },*/
-    
+    on_site_location:{
+      type:DataTypes.STRING
+    },
+    call_center:{
+      type:DataTypes.INTEGER
+    },
+    available:{
+      type:DataTypes.INTEGER
+    },
     supervisor_name:{
       type:DataTypes.STRING
     },
