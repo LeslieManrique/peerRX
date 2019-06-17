@@ -10,7 +10,7 @@ const cors = require('cors');
 //        hoursListRouter, hourItemRouter, userSpecialtiesRouter, signupRouter, adminRouter, loginRouter } = require('./routers'); //require our routes/
 //const {userRouter, interestRouter, signupRouter, adminRouter, loginRouter, locationRouter, agencyRouter, peerRouter} = require('./routers');
 // Constants 
-const {userRouter, interestRouter, signupRouter, adminRouter, loginRouter, agencyRouter, peerRouter, locationRouter} = require('./routers');
+const {userRouter, interestRouter, signupRouter, adminRouter, loginRouter, agencyRouter, peerRouter, locationRouter, languageRouter} = require('./routers');
 const PORT = process.env.PORT || 8080;
 const HOST = '0.0.0.0';
 var corsOptions = {
@@ -58,6 +58,7 @@ app.use(adminRouter);
 app.use(locationRouter);
 app.use(agencyRouter);
 app.use(peerRouter);
+app.use(languageRouter);
 // app.use(agenciesLocationsRouter);
 // app.use(agenciesPeersRouter);
 // app.use(hoursListRouter);

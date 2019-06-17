@@ -11,5 +11,6 @@ module.exports = {
     signupRouter: require('./signup'),
     loginRouter: require('./login'),
     adminRouter: require('./admin'),
-    interestRouter: require('./interest')
+    interestRouter: require('./interest'),
+    languageRouter: require('./language')
 }
