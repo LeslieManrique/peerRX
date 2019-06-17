@@ -18,6 +18,7 @@ router
     .get('/location/public/locations', locationController.getLocationsForAdmin)
     .get('/location/requests', locationController.requestsMadeByLocation)
     .post('/location/request', locationController.requestLocation)
+    .post('/location/peers/request', locationController.findPeers)
 
     
 module.exports = router;

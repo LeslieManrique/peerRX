@@ -22,29 +22,29 @@ const requestsMade = (requestBody) => {
     const todayDate = new Date().toLocaleDateString()
     console.log(requestBody)
     return location_requests
-    .create({   
-                location_id : requestBody.location_id,
-                request_type : requestBody.request_type,
-                gender_preference : requestBody.gender_preference,
-                language_preference : requestBody.language_preference,
-                case : requestBody.case,
-                age_range : requestBody.age_range,
-                created_at : todayDate,
-                note : null,
-                times_requested : 0,
-                expired_at : null,
-                completed : null,
-                peer_id : null,
-                specialty : requestBody.specialty
-        
-    })
-    .then(locationRequest => {
-        return locationRequest.id;
-    })
-    .catch(error => {
-        console.log(error);
-        return null;
-    });
+        .create({
+            location_id: requestBody.location_id,
+            request_type: requestBody.request_type,
+            gender_preference: requestBody.gender_preference,
+            language_preference: requestBody.language_preference,
+            case: requestBody.case,
+            age_range: requestBody.age_range,
+            created_at: todayDate,
+            note: null,
+            times_requested: 0,
+            expired_at: null,
+            completed: null,
+            peer_id: null,
+            specialty: requestBody.specialty
+
+        })
+        .then(locationRequest => {
+            return locationRequest.id;
+        })
+        .catch(error => {
+            console.log(error);
+            return null;
+        });
 }
 
 

@@ -8,6 +8,7 @@ const {getUserId, usersLeftJoin, usersInnerJoin, getGivenUserInfoAll,
 
 const locationQueries = require('../queries/locationQueries')
 const adminQueries = require('../queries/adminQueries')
+const peerQueries = require('../queries/peerQueries')
 
 // user type 2 is a location -- replace this with query 
 // const LOCATION_TYPE = 2;
@@ -327,6 +328,20 @@ function destroy(req, res){
   }
 
 
+const findPeers  = (req, res, next) => {
+    console.log(req.body)
+    peerQueries.findPeersForLocation(
+        req.body.locationId, req.body.specialty,
+        req.body.rank, req.body.language, req.body.gender, req.body.ageRangeStart, req.body.ageRangeEnd)
+        .then(result=>{
+            res.json(result)
+        })
+        .catch(err=>{
+            console.log(err)
+            next(err)
+        })
+}
+
 module.exports = {
     create,
     update,
@@ -337,5 +352,6 @@ module.exports = {
     addAgency,
     getLocationsForAdmin,
     requestsMadeByLocation,
-    requestLocation
+    requestLocation,
+    findPeers
 };
