@@ -3,87 +3,87 @@ const agencyPeers = require('../models').agencyPeers;
 const users = require('../models').users;
 const peer_language = require('../models').peer_language;
 
-const {getGivenUserInfoAll, getUserId, usersLeftJoin, getGivenUserInfo, 
-    usersInnerJoin, deleteGivenUser, updateGivenUserEmail, getUserTypeName} = require('../helpers/queryFunctions');
-const {getCoordinatePoint} = require('../helpers/geocode');
+const { getGivenUserInfoAll, getUserId, usersLeftJoin, getGivenUserInfo,
+    usersInnerJoin, deleteGivenUser, updateGivenUserEmail, getUserTypeName } = require('../helpers/queryFunctions');
+const { getCoordinatePoint } = require('../helpers/geocode');
 // add new peer
-const create = async(req, res) =>{
+const create = async (req, res) => {
     console.log("peer --- ", peer);
-    const user = await users.findOne({where:{id:req.params.userId}});
+    const user = await users.findOne({ where: { id: req.params.userId } });
     // console.log(user)
-    if(!user){
-        return res.status(400).send({message: "UserId does not exist"});
+    if (!user) {
+        return res.status(400).send({ message: "UserId does not exist" });
     }
-    const role = await getUserTypeName(user.user_type); 
+    const role = await getUserTypeName(user.user_type);
     console.log("Role -- ", role);
-    if(role !== 'location' && role !== 'agency'){
-        return res.status(400).send({message: "User does not support peer association"});
+    if (role !== 'location' && role !== 'agency') {
+        return res.status(400).send({ message: "User does not support peer association" });
     }
 
-    const peer_found = await peer.findOne({where: {user_id: parseInt(req.params.userId), email_address: req.body.email_address}});
-    
-    if(peer_found){
+    const peer_found = await peer.findOne({ where: { user_id: parseInt(req.params.userId), email_address: req.body.email_address } });
+
+    if (peer_found) {
         console.log("Peer already exists");
-        return res.status(400).send({message: "Peer already exists."});
+        return res.status(400).send({ message: "Peer already exists." });
     }
-    else{
+    else {
         console.log("Peer does not exist")
     }
 
     return peer
-            .create({
-                first_name: req.body.first_name,
-                last_name: req.body.last_name,
-                email_address: req.body.email_address,
-                phone_number: req.body.phone_number,
-                address1: req.body.address1,
-                address2: req.body.address2,
-                city: req.body.city,
-                state: req.body.state,
-                zipcode: req.body.zip,
-                specialty: req.body.specialty,
-                age_range_start: req.body.age_range_start,
-                age_range_end: req.body.age_range_end,
-                language: req.body.language,
-                gender: req.body.gender,
-                certification: req.body.certification,
-                certification_expiration_date: req.body.certification_expiration_date,
-                licensure: req.body.licensure,
-                training_1: req.body.training_1,
-                training_2: req.body.training_2,
-                training_3: req.body.training_3,
-                supervisor_name: req.body.supervisor_name,
-                supervisor_phone_number: req.body.supervisor_phone_number,
-                coordinate_point: 'LAT, LON',
-                user_id: parseInt(req.params.userId)
-            })
-            .then(peer => {
-                console.log("success!", peer);
-                return res.status(200).send("New Peer Created");
-            })
-            .catch(error => {
-                console.log(error);
-                return res.status(400).send(error)
-            });
+        .create({
+            first_name: req.body.first_name,
+            last_name: req.body.last_name,
+            email_address: req.body.email_address,
+            phone_number: req.body.phone_number,
+            address1: req.body.address1,
+            address2: req.body.address2,
+            city: req.body.city,
+            state: req.body.state,
+            zipcode: req.body.zip,
+            specialty: req.body.specialty,
+            age_range_start: req.body.age_range_start,
+            age_range_end: req.body.age_range_end,
+            language: req.body.language,
+            gender: req.body.gender,
+            certification: req.body.certification,
+            certification_expiration_date: req.body.certification_expiration_date,
+            licensure: req.body.licensure,
+            training_1: req.body.training_1,
+            training_2: req.body.training_2,
+            training_3: req.body.training_3,
+            supervisor_name: req.body.supervisor_name,
+            supervisor_phone_number: req.body.supervisor_phone_number,
+            coordinate_point: 'LAT, LON',
+            user_id: parseInt(req.params.userId)
+        })
+        .then(peer => {
+            console.log("success!", peer);
+            return res.status(200).send("New Peer Created");
+        })
+        .catch(error => {
+            console.log(error);
+            return res.status(400).send(error)
+        });
 }
 
 // list peers
-const list = async(req, res) => {
+const list = async (req, res) => {
     console.log("list function");
-    const user = await users.findOne({where:{id:req.params.userId}});
-    if(req.query.peerId){
+    const user = await users.findOne({ where: { id: req.params.userId } });
+    if (req.query.peerId) {
         console.log(req.query.peerId);
-        return peer.findAll({where:{user_id:parseInt(req.params.userId), peer_id: parseInt(req.query.peerId)}})
-                .then(peers => {
-                    return res.status(200).send(peers); 
-                })
-                .catch(error => res.status(400).send(error));
-    }
-    else{
-        console.log(req.query);
-        return peer.findAll({where:{user_id:req.params.userId}})
+        return peer.findAll({ where: { user_id: parseInt(req.params.userId), peer_id: parseInt(req.query.peerId) } })
             .then(peers => {
-                return res.status(200).send(peers); 
+                return res.status(200).send(peers);
+            })
+            .catch(error => res.status(400).send(error));
+    }
+    else {
+        console.log(req.query);
+        return peer.findAll({ where: { user_id: req.params.userId } })
+            .then(peers => {
+                return res.status(200).send(peers);
             })
             .catch(error => res.status(400).send(error));
     }
@@ -128,171 +128,145 @@ const list = async(req, res) => {
 //         })
 //         .catch(error => error);
 // }
-const update = async(req, res) =>{
+const update = async (req, res) => {
     console.log("peer --- ", peer);
-    const user = await users.findOne({where:{id:req.params.userId}});
+    const user = await users.findOne({ where: { id: req.params.userId } });
     // console.log(user)
-    if(!user){
-        return res.status(400).send({message: "UserId does not exist"});
+    if (!user) {
+        return res.status(400).send({ message: "UserId does not exist" });
     }
-    const role = await getUserTypeName(user.user_type); 
-    
+    const role = await getUserTypeName(user.user_type);
+
     console.log("Role -- ", role);
-    if(role !== 'location' && role !== 'agency'){
-        return res.status(400).send({message: "User does not support peer association"});
+    if (role !== 'location' && role !== 'agency') {
+        return res.status(400).send({ message: "User does not support peer association" });
     }
 
-    const peer_found = await peer.findOne({where: {user_id: parseInt(req.params.userId), peer_id: req.params.peerId}});
-    console.log(peer_found); 
-    if(!peer_found){
+    const peer_found = await peer.findOne({ where: { user_id: parseInt(req.params.userId), peer_id: req.params.peerId } });
+    console.log(peer_found);
+    if (!peer_found) {
         console.log("Peer does not exists");
-        return res.status(400).send({message: "Peer does not exist."});
+        return res.status(400).send({ message: "Peer does not exist." });
     }
-   
+
     return peer_found
-            .update({
-                first_name: req.body.first_name,
-                last_name: req.body.last_name,
-                email_address: req.body.email_address,
-                phone_number: req.body.phone_number,
-                address1: req.body.address1,
-                address2: req.body.address2,
-                city: req.body.city,
-                state: req.body.state,
-                zipcode: req.body.zipcode,
-                specialty: req.body.specialty,
-                age_range_start: req.body.age_range_start,
-                age_range_end: req.body.age_range_end,
-                language: req.body.language,
-                gender: req.body.gender,
-                certification: req.body.certification,
-                certification_expiration_date: req.body.certification_expiration_date,
-                licensure: req.body.licensure,
-                training_1: req.body.training_1,
-                training_2: req.body.training_2,
-                training_3: req.body.training_3,
-                supervisor_name: req.body.supervisor_name,
-                supervisor_phone_number: req.body.supervisor_phone_number,
-                coordinate_point: getCoordinatePoint(req.body.address1, req.body.address2, 
-                                                    req.body.city, req.body.state, req.body.zipcode),
-            })
-            .then(peer => {
-                console.log("success!", peer);
-                return res.status(200).send("Peer Updated");
-            })
-            .catch(error => {
-                console.log(error);
-                return res.status(400).send(error)
-            });
+        .update({
+            first_name: req.body.first_name,
+            last_name: req.body.last_name,
+            email_address: req.body.email_address,
+            phone_number: req.body.phone_number,
+            address1: req.body.address1,
+            address2: req.body.address2,
+            city: req.body.city,
+            state: req.body.state,
+            zipcode: req.body.zipcode,
+            specialty: req.body.specialty,
+            age_range_start: req.body.age_range_start,
+            age_range_end: req.body.age_range_end,
+            language: req.body.language,
+            gender: req.body.gender,
+            certification: req.body.certification,
+            certification_expiration_date: req.body.certification_expiration_date,
+            licensure: req.body.licensure,
+            training_1: req.body.training_1,
+            training_2: req.body.training_2,
+            training_3: req.body.training_3,
+            supervisor_name: req.body.supervisor_name,
+            supervisor_phone_number: req.body.supervisor_phone_number,
+            coordinate_point: getCoordinatePoint(req.body.address1, req.body.address2,
+                req.body.city, req.body.state, req.body.zipcode),
+        })
+        .then(peer => {
+            console.log("success!", peer);
+            return res.status(200).send("Peer Updated");
+        })
+        .catch(error => {
+            console.log(error);
+            return res.status(400).send(error)
+        });
 }
 
-const destroy = async(req, res) =>{
+const destroy = async (req, res) => {
     console.log("peer --- ", peer);
-    const user = await users.findOne({where:{id:req.params.userId}});
+    const user = await users.findOne({ where: { id: req.params.userId } });
     // console.log(user)
-    if(!user){
-        return res.status(400).send({message: "UserId does not exist"});
+    if (!user) {
+        return res.status(400).send({ message: "UserId does not exist" });
     }
-    const role = await getUserTypeName(user.user_type); 
-    
+    const role = await getUserTypeName(user.user_type);
+
     console.log("Role -- ", role);
-    if(role !== 'location' && role !== 'agency'){
-        return res.status(400).send({message: "User does not support peer association"});
+    if (role !== 'location' && role !== 'agency') {
+        return res.status(400).send({ message: "User does not support peer association" });
     }
 
-    const peer_found = await peer.findOne({where: {user_id: parseInt(req.params.userId), peer_id: req.params.peerId}});
-    if(!peer_found){
+    const peer_found = await peer.findOne({ where: { user_id: parseInt(req.params.userId), peer_id: req.params.peerId } });
+    if (!peer_found) {
         console.log("Peer does not exists");
-        return res.status(400).send({message: "Peer does not exist."});
+        return res.status(400).send({ message: "Peer does not exist." });
     }
-    else{
+    else {
         return peer_found
             .destroy()
-            .then(()=>{
-                res,status(200).send({message: "Peer deleted"});
+            .then(() => {
+                res, status(200).send({ message: "Peer deleted" });
             })
-            .catch((error)=>{
+            .catch((error) => {
                 res.status(400).send(error);
             })
     }
-   
+
 }
 
-const createPeer = async(req, res) =>{
+const createPeer = (req, res, next) => {
 
     return peer
-            .create({
-                first_name: req.body.first_name,
-                last_name: req.body.last_name,
-                email_address: req.body.email_address,
-                phone_number: req.body.phone_number,
-                address1: req.body.address1,
-                //address2: req.body.address2,
-                city: req.body.city,
-                state: req.body.state,
-                zipcode: req.body.zip,
-                specialty: req.body.specialty,
-                age_range_start: req.body.age_range_start,
-                age_range_end: req.body.age_range_end,
-                language: req.body.language,
-                gender: req.body.gender,
-                certification: req.body.certification,
-                certification_expiration_date: req.body.certification_expiration_date,
-                licensure: req.body.licensure,
-                training_1: req.body.training_1,
-                available: req.body.available,
-                call_center: req.body.call_center,
-                on_site_location:req.body.on_site_location,
-                rank:req.body.rank,
-                //training_2: req.body.training_2,
-                //training_3: req.body.training_3,
-                supervisor_name: req.body.supervisor_name,
-                supervisor_phone_number: req.body.supervisor_phone_number,
-                coordinate_point: 'LAT, LON',
-                user_id: parseInt(req.body.agency_id)
+        .create({
+            first_name: req.body.first_name,
+            last_name: req.body.last_name,
+            email_address: req.body.email_address,
+            phone_number: req.body.phone_number,
+            address1: req.body.address1,
+            //address2: req.body.address2,
+            city: req.body.city,
+            state: req.body.state,
+            zipcode: req.body.zip,
+            specialty: req.body.specialty,
+            age_range_start: req.body.age_range_start,
+            age_range_end: req.body.age_range_end,
+            language: req.body.language,
+            gender: req.body.gender,
+            certification: req.body.certification,
+            certification_expiration_date: req.body.certification_expiration_date,
+            licensure: req.body.licensure,
+            training_1: req.body.training_1,
+            available: req.body.available,
+            call_center: req.body.call_center,
+            on_site_location: req.body.on_site_location,
+            rank: req.body.rank,
+            //training_2: req.body.training_2,
+            //training_3: req.body.training_3,
+            supervisor_name: req.body.supervisor_name,
+            supervisor_phone_number: req.body.supervisor_phone_number,
+            coordinate_point: 'LAT, LON',
+            user_id: parseInt(req.body.agency_id)
 
-          
+
+        })
+        .then(peer => {
+            let languages = req.body.languages || null;
+            let languagesJson = languages.map(function (language) {
+                return { "language_id": language, "peer_id": peer.peer_id }
             })
-            .then(peer => {
-                console.log("success!!!", peer.peer_id);
-                let result = [];
-                let languages = req.body.languages || null;
-                console.log("lang", languages);
 
-
-                let promises = languages.map(function(language){
-                    return peer_language
-                        .create({
-                            "language_id": language,
-                            "peer_id": peer.peer_id
-                        })
-                        .then(function(){
-                            result.push({
-                                language: language,
-                                success: true
-                            })
-                        })
-                        .catch(function(err){
-                            result.push({
-                                language: language,
-                                success: false
-                            });
-                            return Promise.resolve();
-                        });       
-
-                })
-
-                return Promise.all(promises)
-                    .then(function(){
-                        return Promise.resolve(result);
-                    })
-
-                //return res.status(200).send("New Peer Created");
-            })
-            .catch(error => {
-                console.log(error);
-                return res.status(400).send(error)
-            });
+            return peer_language.bulkCreate(languagesJson, { updateOnDuplicate: ["peer_id", "language_id"] })
+        })
+        .then(results => {
+            res.json(results)
+        })
+        .catch(err => {
+            next(err)
+        });
 }
 
 module.exports = {
