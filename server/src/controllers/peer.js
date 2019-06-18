@@ -1,6 +1,8 @@
 const peer = require('../models').peers;
 const agencyPeers = require('../models').agencyPeers;
 const users = require('../models').users;
+const peer_language = require('../models').peer_language;
+
 const {getGivenUserInfoAll, getUserId, usersLeftJoin, getGivenUserInfo, 
     usersInnerJoin, deleteGivenUser, updateGivenUserEmail, getUserTypeName} = require('../helpers/queryFunctions');
 const {getCoordinatePoint} = require('../helpers/geocode');
@@ -252,8 +254,40 @@ const createPeer = async(req, res) =>{
           
             })
             .then(peer => {
-                console.log("success!", peer);
-                return res.status(200).send("New Peer Created");
+                console.log("success!!!", peer.peer_id);
+                let result = [];
+                let languages = req.body.languages || null;
+                console.log("lang", languages);
+
+
+                let promises = languages.map(function(language){
+                    return peer_language
+                        .create({
+                            "language_id": language,
+                            "peer_id": peer.peer_id
+                        })
+                        .then(function(){
+                            result.push({
+                                language: language,
+                                success: true
+                            })
+                        })
+                        .catch(function(err){
+                            result.push({
+                                language: language,
+                                success: false
+                            });
+                            return Promise.resolve();
+                        });       
+
+                })
+
+                return Promise.all(promises)
+                    .then(function(){
+                        return Promise.resolve(result);
+                    })
+
+                //return res.status(200).send("New Peer Created");
             })
             .catch(error => {
                 console.log(error);
