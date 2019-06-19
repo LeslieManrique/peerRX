@@ -234,7 +234,7 @@ const createPeer = (req, res, next) => {
             specialty: req.body.specialty,
             age_range_start: req.body.age_range_start,
             age_range_end: req.body.age_range_end,
-            language: req.body.language,
+            //language: req.body.language,
             gender: req.body.gender,
             certification: req.body.certification,
             certification_expiration_date: req.body.certification_expiration_date,
@@ -248,11 +248,8 @@ const createPeer = (req, res, next) => {
             //training_3: req.body.training_3,
             supervisor_name: req.body.supervisor_name,
             supervisor_phone_number: req.body.supervisor_phone_number,
-            coordinate_point: getCoordinatePoint(req.body.address1, null,
-                req.body.city, req.body.state, req.body.zipcode),
+            coordinate_point: getCoordinatePoint(req.body.address1, null, req.body.city, req.body.state, req.body.zipcode),
             user_id: parseInt(req.body.agency_id)
-
-
         })
         .then(peer => {
             let languages = req.body.languages || null;
@@ -271,31 +268,19 @@ const createPeer = (req, res, next) => {
 }
 
 
-const updatePeer = async(req, res, next) => {
-
-    const peer_found = await peer.findOne({ where: { peer_id: parseInt(req.body.peerId)}})
-    console.log("res: ",peer_found)
-    if (!peer_found) {
-        console.log("Peer does not exists");
-        return res.status(400).send({ message: "Peer does not exist." });
-    }
-  
-    //return res.status(200).send({ message: "Peer  Found" });
-    return peer_found
-        .update({
+const updatePeer = (req, res, next) => {
+    return peer.update({
             first_name: req.body.first_name,
             last_name: req.body.last_name,
             email_address: req.body.email_address,
             phone_number: req.body.phone_number,
             address1: req.body.address1,
-            //address2: req.body.address2,
             city: req.body.city,
             state: req.body.state,
             zipcode: req.body.zip,
             specialty: req.body.specialty,
             age_range_start: req.body.age_range_start,
             age_range_end: req.body.age_range_end,
-            language: req.body.language,
             gender: req.body.gender,
             certification: req.body.certification,
             certification_expiration_date: req.body.certification_expiration_date,
@@ -305,41 +290,40 @@ const updatePeer = async(req, res, next) => {
             call_center: req.body.call_center,
             on_site_location: req.body.on_site_location,
             rank: req.body.rank,
-            //training_2: req.body.training_2,
-            //training_3: req.body.training_3,
             supervisor_name: req.body.supervisor_name,
             supervisor_phone_number: req.body.supervisor_phone_number,
-            coordinate_point: getCoordinatePoint(req.body.address1, null,
-                req.body.city, req.body.state, req.body.zipcode),
+            coordinate_point: getCoordinatePoint(req.body.address1, null, req.body.city, req.body.state, req.body.zipcode),
             user_id: parseInt(req.body.agency_id)
-
-
-        })
+        },{returning: true, where: {peer_id: req.body.peerId}})
         .then(peer => {
-            let listIdLanguages = req.body.languageIds || null
-            listIdLanguages.map(language=>{
-                peer_language.destroy({where:{peer_languages_id:language.peer_languages_id}})
-                .then(() => {
-                    res, status(200).send({ message: "Peer_language_id deleted" });
-                })
-                .catch((error) => {
-                        res.status(400).send(error);
+            if(peer){
+                req.body.languageIds.map(language=>{
+                    console.log("printing: ",language)
+                    peer_language.destroy({where:{peer_languages_id:language}})
+                    .then(() => {
+                        console.log("deleted")
                     })
-            })
-            
-            let languages = req.body.languages || null;
-            let languagesJson = languages.map(function (language) {
-                return { "language_id": language, "peer_id": peer.peer_id }
-            })
+                    .catch((error) => {
+                        console.log("No deleted Error")
+                    })
+                })
 
-            return peer_language.bulkCreate(languagesJson, { updateOnDuplicate: ["peer_id", "language_id"] })
+                let languages = req.body.languages || null;
+                let languagesJson = languages.map(function (language) {
+                    return { "language_id": language, "peer_id": req.body.peerId }
+                })
+
+                return peer_language.bulkCreate(languagesJson, { updateOnDuplicate: ["peer_id", "language_id"] })
+            }
         })
         .then(results => {
             res.json(results)
         })
         .catch(err => {
             next(err)
+            res.status(400).send({ message: "error" });
         });
+
  
 }
 

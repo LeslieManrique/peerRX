@@ -1,5 +1,5 @@
 const sequelize = require('../models').sequelize;
-
+            
 const findPeersForLocation = (locationId, specialty, rank, language, gender, ageRangeStart, ageRangeEnd) => {
     let query
     if (locationId && specialty, rank) {
