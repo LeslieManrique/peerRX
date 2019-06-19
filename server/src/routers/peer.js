@@ -6,6 +6,7 @@ const {authenticateAdmin, authenticatePeer, authenticateGeneral, isApproved, can
 router
     //.post('/peer/add/:userId', peerController.create)
     .post('/agency/peer/add', peerController.createPeer)
+    .put('/agency/peer/update', peerController.updatePeer)
     .get('/peer/list/:userId', [authenticateGeneral, isApproved, canAccessParam], peerController.list)
     .put('/peer/update/:userId/:peerId', [authenticateGeneral, isApproved, canAccessParam], peerController.update)
     .delete('/peer/delete/:userId/:peerId', [authenticateGeneral, isApproved, canAccessParam], peerController.destroy);
