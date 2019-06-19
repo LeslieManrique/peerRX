@@ -234,7 +234,7 @@ const createPeer = (req, res, next) => {
             specialty: req.body.specialty,
             age_range_start: req.body.age_range_start,
             age_range_end: req.body.age_range_end,
-            language: req.body.language,
+            //language: req.body.language,
             gender: req.body.gender,
             certification: req.body.certification,
             certification_expiration_date: req.body.certification_expiration_date,
@@ -248,10 +248,8 @@ const createPeer = (req, res, next) => {
             //training_3: req.body.training_3,
             supervisor_name: req.body.supervisor_name,
             supervisor_phone_number: req.body.supervisor_phone_number,
-            coordinate_point: 'LAT, LON',
+            coordinate_point: getCoordinatePoint(req.body.address1, null, req.body.city, req.body.state, req.body.zipcode),
             user_id: parseInt(req.body.agency_id)
-
-
         })
         .then(peer => {
             let languages = req.body.languages || null;
@@ -269,10 +267,71 @@ const createPeer = (req, res, next) => {
         });
 }
 
+
+const updatePeer = (req, res, next) => {
+    return peer.update({
+            first_name: req.body.first_name,
+            last_name: req.body.last_name,
+            email_address: req.body.email_address,
+            phone_number: req.body.phone_number,
+            address1: req.body.address1,
+            city: req.body.city,
+            state: req.body.state,
+            zipcode: req.body.zip,
+            specialty: req.body.specialty,
+            age_range_start: req.body.age_range_start,
+            age_range_end: req.body.age_range_end,
+            gender: req.body.gender,
+            certification: req.body.certification,
+            certification_expiration_date: req.body.certification_expiration_date,
+            licensure: req.body.licensure,
+            training_1: req.body.training_1,
+            available: req.body.available,
+            call_center: req.body.call_center,
+            on_site_location: req.body.on_site_location,
+            rank: req.body.rank,
+            supervisor_name: req.body.supervisor_name,
+            supervisor_phone_number: req.body.supervisor_phone_number,
+            coordinate_point: getCoordinatePoint(req.body.address1, null, req.body.city, req.body.state, req.body.zipcode),
+            user_id: parseInt(req.body.agency_id)
+        },{returning: true, where: {peer_id: req.body.peerId}})
+        .then(peer => {
+            if(peer){
+                req.body.languageIds.map(language=>{
+                    console.log("printing: ",language)
+                    peer_language.destroy({where:{peer_languages_id:language}})
+                    .then(() => {
+                        console.log("deleted")
+                    })
+                    .catch((error) => {
+                        console.log("No deleted Error")
+                    })
+                })
+
+                let languages = req.body.languages || null;
+                let languagesJson = languages.map(function (language) {
+                    return { "language_id": language, "peer_id": req.body.peerId }
+                })
+
+                return peer_language.bulkCreate(languagesJson, { updateOnDuplicate: ["peer_id", "language_id"] })
+            }
+        })
+        .then(results => {
+            res.json(results)
+        })
+        .catch(err => {
+            next(err)
+            res.status(400).send({ message: "error" });
+        });
+
+ 
+}
+
 module.exports = {
     create,
     update,
     list,
     destroy,
-    createPeer
+    createPeer,
+    updatePeer
 };
