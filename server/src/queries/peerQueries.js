@@ -7,7 +7,7 @@ const findPeersForLocation = (locationId, specialty, rank, language, gender, age
         where p.location_id = ? and p.specialty = ? and p.rank = ? `
     }
     if (language) {
-        query = query + `and pl.language = ? `
+        query = query + `and pl.language_id = ? `
     }
     if (gender) {
         query = query + `and p.gender = ? `
