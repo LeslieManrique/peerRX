@@ -10,7 +10,7 @@ const peerList = (agencyId) => {
     const joinQuery = `select ${VIEWABLE_REQUESTS_AGENCY_COLS}\
                          FROM peer_app_dev.agencies as a\
                          INNER JOIN peer_app_dev.peers as p on a.agency_id=p.user_id\
-                         INNER JOIN peer_app_dev.peer_languages as l on p.peer_id=l.peer_id\
+                         LEFT JOIN peer_app_dev.peer_languages as l on p.peer_id=l.peer_id\
                          WHERE a.agency_id=${agencyId} group by l.peer_id`
 
     return sequelize

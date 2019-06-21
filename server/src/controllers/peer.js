@@ -252,12 +252,20 @@ const createPeer = (req, res, next) => {
             user_id: parseInt(req.body.agency_id)
         })
         .then(peer => {
-            let languages = req.body.languages || null;
-            let languagesJson = languages.map(function (language) {
-                return { "language_id": language, "peer_id": peer.peer_id }
-            })
-
-            return peer_language.bulkCreate(languagesJson, { updateOnDuplicate: ["peer_id", "language_id"] })
+            console.log(req.body.languages.length)
+            if(req.body.languages.length === 0 ){
+                return peer_language.create({ "language_id": null, "peer_id": peer.peer_id })
+            } else {
+                let languages = req.body.languages || null;
+                let languagesJson = languages.map(function (language) {
+                    return { "language_id": language, "peer_id": peer.peer_id }//peer.peer_id
+                })
+                return peer_language.bulkCreate(languagesJson, { updateOnDuplicate: ["peer_id", "language_id"] })
+            }
+           //let languages = req.body.languages || null;
+           //let languagesJson = languages.map(function (language) {
+           //     return { "language_id": language, "peer_id": peer.peer_id }
+           // return peer_language.bulkCreate(languagesJson, { updateOnDuplicate: ["peer_id", "language_id"] })
         })
         .then(results => {
             res.json(results)
@@ -308,12 +316,21 @@ const updatePeer = (req, res, next) => {
                     })
                 })
 
-                let languages = req.body.languages || null;
+                if(req.body.languages.length === 0 ){
+                    return peer_language.create({ "language_id": null, "peer_id": req.body.peerId })
+                } else {
+                    let languages = req.body.languages || null;
+                    let languagesJson = languages.map(function (language) {
+                        return { "language_id": language, "peer_id":  req.body.peerId}
+                    })
+                    return peer_language.bulkCreate(languagesJson, { updateOnDuplicate: ["peer_id", "language_id"] })
+                }
+                /*let languages = req.body.languages || null;
                 let languagesJson = languages.map(function (language) {
                     return { "language_id": language, "peer_id": req.body.peerId }
                 })
 
-                return peer_language.bulkCreate(languagesJson, { updateOnDuplicate: ["peer_id", "language_id"] })
+                return peer_language.bulkCreate(languagesJson, { updateOnDuplicate: ["peer_id", "language_id"] })*/
             }
         })
         .then(results => {
