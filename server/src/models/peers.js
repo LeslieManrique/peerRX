@@ -79,7 +79,10 @@ module.exports = (sequelize, DataTypes) => {
     on_site_location:{
       type:DataTypes.STRING
     },
-    call_center:{
+    on_site_location:{
+      type:DataTypes.STRING
+    },
+    on_site:{
       type:DataTypes.INTEGER
     },
     available:{

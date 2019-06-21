@@ -297,6 +297,7 @@ const updatePeer = (req, res, next) => {
             available: req.body.available,
             call_center: req.body.call_center,
             on_site_location: req.body.on_site_location,
+            on_site:req.body.on_site,
             rank: req.body.rank,
             supervisor_name: req.body.supervisor_name,
             supervisor_phone_number: req.body.supervisor_phone_number,
