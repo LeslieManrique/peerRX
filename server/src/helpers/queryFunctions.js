@@ -73,7 +73,7 @@ const getDataByParam = async(obj, table) => {
     console.log("FUNCTION GETDATABYPARAM");
     console.log('obj -- ', obj);
     console.log('table --',table);
-    const cols = '`name`, `phone_number`, `address1`, `address2`, `city`, `state`, `zipcode`';
+    const cols = '`agency_id`,`name`, `phone_number`, `address1`, `address2`, `city`, `state`, `zipcode`';
     let getQuery = ''
     //cols - [state, zip]
     if(obj.zipcode && obj.state){
@@ -116,7 +116,7 @@ const getAgenciesQuery = async(obj, table) => {
     console.log("FUNCTION GETDATABYPARAM");
     console.log('obj -- ', obj);
     console.log('table --',table);
-    const cols = '`name`, `phone_number`, `address1`, `address2`, `city`, `state`, `zipcode`';
+    const cols = '`name`,`name`, `phone_number`, `address1`, `address2`, `city`, `state`, `zipcode`';
     let getQuery = 'SELECT users.id, agencies.name, users.email_address, agencies.address1, agencies.phone_number, users.approved FROM agencies INNER JOIN users ON agencies.agency_id = users.id;'
     
     console.log(getQuery);
