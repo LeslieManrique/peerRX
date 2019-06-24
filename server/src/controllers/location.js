@@ -4,7 +4,7 @@ const location_agency = require('../models').location_preferred_agencies;
 const { getCoordinatePoint } = require('../helpers/geocode');
 const { getUserId, usersLeftJoin, usersInnerJoin, getGivenUserInfoAll,
     getGivenUserInfo, deleteGivenUser, updateGivenUserEmail, isAddressChanged, getUserProfile, registerUser, getUserTypeFromName, getDataByParam } = require('../helpers/queryFunctions');
-
+const location_preferred_agencies = require('../models').location_preferred_agencies;
 
 const locationQueries = require('../queries/locationQueries')
 const adminQueries = require('../queries/adminQueries')
@@ -67,7 +67,22 @@ const create = async (req, res) => {
                                 on_site_peers: req.body.on_site_peers,
                                 location_type: req.body.location_type
                             })
-                            .then(location => res.status(201).send(location))
+                            .then(location => {
+                                if(req.body.prefered_agencies.length === 0 ){
+                                    return location_preferred_agencies.create({ "location_id": location.location_id, "agency_id": null })
+                                } else {
+                                    let agencies = req.body.prefered_agencies || null;
+                                    let agenciesJson = agencies.map(function (agency) {
+                                        return { "location_id": location.location_id, "agency_id": agency.id }
+                                    })
+                                    return location_preferred_agencies.bulkCreate(agenciesJson, { updateOnDuplicate: ["location_id", "agency_id"] })
+                                }
+
+                            })
+                            .then(results => {
+                                console.log('RESPONSE CREATE: ', results)
+                                res.json(results)
+                            })
                             .catch(error => {
                                 //delete created id
                                 users.destroy({ where: { id: registration_id } });
