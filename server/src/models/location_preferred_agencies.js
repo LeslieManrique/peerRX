@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     agency_id:{
         type: DataTypes.INTEGER,
         primaryKey: true,
-        allowNull: false
+        allowNull: true
     }
    
   }, {timestamps: false});
